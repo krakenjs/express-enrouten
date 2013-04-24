@@ -52,9 +52,9 @@ enrouten(app).withRoutes({
 });
 ```
 
-A 'controller' is defined as any javascript file (extension of `.js`)
-that exports a function which accepts a single argument. **NOTE: Any file in the directory tree that matches the API will
-be invoked/initialized with the server object.**
+### Controller Files
+A 'controller' is defined as any javascript file (extension of `.js`) which exports a function that accepts a single argument.
+**NOTE: Any file in the directory tree that matches the API will be invoked/initialized with the express application object.**
 ```javascript
 // Good :)
 // controllers/controller.js

@@ -1,6 +1,6 @@
 {
   "name": "express-enrouten",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An express route initialization and configuration module.",
   "main": "index.js",
   "scripts": {
@@ -16,6 +16,9 @@
   ],
   "author": "Erik Toth <ertoth@paypal.com>",
   "license": "BSD",
+  "peerDependencies": {
+    "express": "~3.2"
+  },
   "devDependencies": {
     "mocha": "~1.9.0",
     "chai": "~1.5.0"

@@ -20,7 +20,7 @@ enrouten(app).withRoutes({ ... });
 express-enrouten supports routes via configuration and convention.
 ```javascript
 enrouten(app).withRoutes({
-    directory: '',
+    directory: 'controllers',
     routes: [{
         method: 'get',
         path: '/foo',

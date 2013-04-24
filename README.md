@@ -33,9 +33,22 @@ enrouten(app).withRoutes({
 
 - `directory` (optional) - String or array of path segments. Specify a directory to have enrouten scan all files recursively
 to find files that match the controller-spec API.
+
 ```javascript
 enrouten(app).withRoutes({
     directory: 'controllers'
+});
+```
+
+- `routes` (optional) An array of route definition objects. Each definition must have a `path` and `handler` property and
+can have an optional `method` property (`method` defaults to 'GET').
+
+```javascript
+enrouten(app).withRoutes({
+    routes: [
+        { path: '/',    method: 'GET', handler: require('./controllers/index') },
+        { path: '/foo', method: 'GET', handler: require('./controllers/foo') }
+    ]
 });
 ```
 
@@ -73,15 +86,4 @@ module.exports = {
 
     }
 };
-```
-
-- `routes` (optional) An array of route definition objects. Each definition must have a `path` and `handler` property and
-can have an optional `method` property (`method` defaults to 'GET').
-```javascript
-enrouten(app).withRoutes({
-    routes: [
-        { path: '/',    method: 'GET', handler: require('./controllers/index') },
-        { path: '/foo', method: 'GET', handler: require('./controllers/foo') }
-    ]
-});
 ```

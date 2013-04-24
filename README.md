@@ -73,14 +73,14 @@ exports = function (app) {
 // Bad :(
 // controllers/other-file-in-same-controller-directory.js
 modules.exports = function (config) {
-    // `config` will the express application
+    // `config` will be the express application
     // ...
 };
 
 // Acceptable :)
-// controllers/config.json - A non-js file
-// controllers/README.txt - A non-js file
-// controllers/util.js - A js file that has a different API than the spec
+// controllers/config.json - A non-js file (ignored)
+// controllers/README.txt - A non-js file (ignored)
+// controllers/util.js - A js file that has a different API than the spec (ignored)
 module.exports = {
     importantHelper: function () {
 

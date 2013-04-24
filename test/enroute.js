@@ -14,109 +14,306 @@ describe('express-enrouten', function () {
     });
 
 
-    it('should scan a relative path', function () {
-        var initialized, shim;
+    it('should handle random config settings', function () {
 
-        initialized = false;
+        enrouten({}).withRoutes({});
 
-        shim = {
-            get: function () {
-                initialized = true;
-            }
-        };
-
-        enrouten(shim).withRoutes({
-            directory: path.join('.', 'fixtures', 'flat')
+        enrouten({}).withRoutes({
+            directory: null
         });
 
-        assert.ok(initialized);
+        enrouten({}).withRoutes({
+            routes: null
+        });
+
+        enrouten({}).withRoutes({
+            routes: []
+        });
+
     });
 
 
-    it('should scan an absolute path', function () {
-        var initialized, shim;
-
-        initialized = false;
-
-        shim = {
-            get: function () {
-                initialized = true;
-            }
-        };
-
-        enrouten(shim).withRoutes({
-            directory: path.join(process.cwd(), 'fixtures', 'flat')
-        });
-
-        assert.ok(initialized);
-    });
+    describe('directory', function () {
 
 
-    it('should throw when scanning an invalid path', function () {
-        var error, initialized, shim;
+        it('should scan a relative path', function () {
+            var initialized, shim;
 
-        initialized = false;
-        shim = {
-            get: function () {
-                initialized = true;
-            }
-        };
+            initialized = false;
 
-        try {
+            shim = {
+                get: function () {
+                    initialized = true;
+                }
+            };
+
             enrouten(shim).withRoutes({
-                directory: path.join(process.cwd(), 'fixtures', 'whatthewhat')
+                directory: path.join('.', 'fixtures', 'flat')
             });
-        } catch (err) {
-            error = err;
-        }
 
-        assert.ok(error);
-    });
+            assert.ok(initialized);
+        });
 
 
-    it('should traverse a nested directory structure', function () {
-        var error, initialized, shim;
+        it('should scan an absolute path', function () {
+            var initialized, shim;
 
-        initialized = [];
-        shim = {
-            get: function () {
-                initialized.push(initialized.length);
+            initialized = false;
+
+            shim = {
+                get: function () {
+                    initialized = true;
+                }
+            };
+
+            enrouten(shim).withRoutes({
+                directory: path.join(process.cwd(), 'fixtures', 'flat')
+            });
+
+            assert.ok(initialized);
+        });
+
+
+        it('should throw when scanning an invalid path', function () {
+            var error, initialized, shim;
+
+            initialized = false;
+            shim = {
+                get: function () {
+                    initialized = true;
+                }
+            };
+
+            try {
+                enrouten(shim).withRoutes({
+                    directory: path.join(process.cwd(), 'fixtures', 'whatthewhat')
+                });
+            } catch (err) {
+                error = err;
             }
-        };
 
-        try {
+            assert.ok(error);
+        });
+
+
+        it('should traverse a nested directory structure', function () {
+            var error, initialized, shim;
+
+            initialized = [];
+            shim = {
+                get: function () {
+                    initialized.push(initialized.length);
+                }
+            };
+
             enrouten(shim).withRoutes({
                 directory: path.join(process.cwd(), 'fixtures', 'nested')
             });
-        } catch (err) {
-            error = err;
-        }
 
-        assert.ok(!error);
-        assert.strictEqual(initialized.length, 2);
-    });
+            assert.strictEqual(initialized.length, 2);
+        });
 
 
-    it('should ignore files/definitions that don\'t match the published API', function () {
-        var error, initialized, shim;
+        it('should ignore files/definitions that don\'t match the published API', function () {
+            var error, initialized, shim;
 
-        initialized = [];
-        shim = {
-            get: function () {
-                initialized.push(initialized.length);
-            }
-        };
+            initialized = [];
+            shim = {
+                get: function () {
+                    initialized.push(initialized.length);
+                }
+            };
 
-        try {
             enrouten(shim).withRoutes({
                 directory: path.join(process.cwd(), 'fixtures', 'superfluous')
             });
-        } catch (err) {
-            error = err;
-        }
 
-        assert.ok(!error, 'An unexpected error occurred.');
-        assert.strictEqual(initialized.length, 2);
+            assert.strictEqual(initialized.length, 2);
+        });
+
+    });
+
+
+    describe('routes', function () {
+
+        it('should handle a route definition', function () {
+            var initialized, shim;
+
+            initialized = [];
+            shim = {
+                get: function () {
+                    initialized.push(initialized.length);
+                }
+            };
+
+            enrouten(shim).withRoutes({
+                routes: [{
+                    path: '/',
+                    method: 'GET',
+                    handler: function (req, res) {
+                        // ...
+                    }
+                }]
+            });
+
+            assert.strictEqual(initialized.length, 1);
+        });
+
+
+        it('should handle multiple route definitions', function () {
+            var initialized, shim;
+
+            initialized = [];
+            shim = {
+                get: function () {
+                    initialized.push(initialized.length);
+                }
+            };
+
+            enrouten(shim).withRoutes({
+                routes: [
+                    {
+                        path: '/',
+                        method: 'GET',
+                        handler: function (req, res) {
+                            // ...
+                        }
+                    },
+                    {
+                        path: '/foo',
+                        method: 'get',
+                        handler: function (req, res) {
+                            // ...
+                        }
+                    }
+                ]
+            });
+
+            assert.strictEqual(initialized.length, 2);
+        });
+
+
+        it('should default the method to `get`', function () {
+            var initialized, shim;
+
+            initialized = [];
+            shim = {
+                get: function () {
+                    initialized.push(initialized.length);
+                }
+            };
+
+            enrouten(shim).withRoutes({
+                routes: [
+                    {
+                        path: '/',
+                        handler: function (req, res) {
+                            // ...
+                        }
+                    },
+                    {
+                        path: '/foo',
+                        method: 'get',
+                        handler: function (req, res) {
+                            // ...
+                        }
+                    }
+                ]
+            });
+
+            assert.strictEqual(initialized.length, 2);
+        });
+
+
+        it('should handle multiple methods', function () {
+            var initialized, shim;
+
+            initialized = [];
+            shim = {
+                get: function () {
+                    initialized.push(initialized.length);
+                },
+                post: function () {
+                    initialized.push(initialized.length);
+                }
+            };
+
+            enrouten(shim).withRoutes({
+                routes: [
+                    {
+                        path: '/',
+                        method: 'post',
+                        handler: function (req, res) {
+                            // ...
+                        }
+                    },
+                    {
+                        path: '/foo',
+                        method: 'get',
+                        handler: function (req, res) {
+                            // ...
+                        }
+                    }
+                ]
+            });
+
+            assert.strictEqual(initialized.length, 2);
+        });
+
+
+        it('should error on missing path', function () {
+            var shim, error;
+
+            shim = {
+                get: function () {
+                    // ...
+                }
+            };
+
+            try {
+                enrouten(shim).withRoutes({
+                    routes: [
+                        {
+                            method: 'get',
+                            handler: function () {
+                                // ...
+                            }
+                        }
+                    ]
+                });
+            } catch (err) {
+                error = err;
+            }
+
+            assert.ok(error);
+        });
+
+
+        it('should error on missing handler', function () {
+            var shim, error;
+
+            shim = {
+                get: function () {
+                    // ...
+                }
+            };
+
+            try {
+                enrouten(shim).withRoutes({
+                    routes: [
+                        {
+                            path: '/',
+                            method: 'get'
+                        }
+                    ]
+                });
+            } catch (err) {
+                error = err;
+            }
+
+            assert.ok(error);
+        });
+
     });
 
 });

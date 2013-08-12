@@ -24,25 +24,38 @@ function scan(file, controllers) {
 }
 
 
+function loaddir(directory) {
+    if (!directory) {
+        return [];
+    }
+
+    if (Array.isArray(directory)) {
+        directory = path.join.apply(undefined, directory);
+    }
+
+    directory = path.resolve(directory);
+    assert.ok(fs.existsSync(directory), 'Route directory not found. (\'' + directory + '\')');
+
+    return scan(directory);
+}
+
+
+
 module.exports = function (app) {
 
     return {
+
         withRoutes: function (settings) {
-            var directory;
 
             settings = settings || {};
 
             // Directory to scan for routes
-            directory = settings.directory;
-            if (directory && fs.statSync(directory).isDirectory()) {
-                directory = path.resolve(directory);
-                scan(directory).forEach(function (file) {
-                    var controller = require(file);
-                    if (typeof controller === 'function' && controller.length === 1) {
-                        controller(app);
-                    }
-                });
-            }
+            loaddir(settings.directory).forEach(function (file) {
+                var controller = require(file);
+                if (typeof controller === 'function' && controller.length === 1) {
+                    controller(app);
+                }
+            });
 
             (settings.routes || []).forEach(function (def) {
                 assert.ok(def.path, 'path is required');
@@ -56,4 +69,3 @@ module.exports = function (app) {
     };
 
 };
-

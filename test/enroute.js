@@ -23,6 +23,10 @@ describe('express-enrouten', function () {
         });
 
         enrouten({}).withRoutes({
+            index: null
+        });
+
+        enrouten({}).withRoutes({
             routes: null
         });
 
@@ -306,6 +310,72 @@ describe('express-enrouten', function () {
                             method: 'get'
                         }
                     ]
+                });
+            } catch (err) {
+                error = err;
+            }
+
+            assert.ok(error);
+        });
+
+    });
+
+
+    describe('index', function () {
+
+        it('should only load the automatic index file', function () {
+            var initialized, shim;
+
+            initialized = [];
+
+            shim = {
+                get: function (path) {
+                    initialized.push(path);
+                }
+            };
+
+            enrouten(shim).withRoutes({
+                index: path.join('.', 'fixtures', 'indexed')
+            });
+
+            assert.strictEqual(initialized.length, 2);
+            assert.strictEqual(initialized[0], '/good');
+            assert.strictEqual(initialized[1], '/subgood');
+        });
+
+        it('should only load the automatic explicit index file', function () {
+            var initialized, shim;
+
+            initialized = [];
+
+            shim = {
+                get: function (path) {
+                    initialized.push(path);
+                }
+            };
+
+            enrouten(shim).withRoutes({
+                index: path.join('.', 'fixtures', 'indexed', 'index')
+            });
+
+            assert.strictEqual(initialized.length, 2);
+            assert.strictEqual(initialized[0], '/good');
+            assert.strictEqual(initialized[1], '/subgood');
+        });
+
+
+        it('should not load missing index file', function () {
+            var error, shim;
+
+            shim = {
+                get: function (path) {
+                    // ...
+                }
+            };
+
+            try {
+                enrouten(shim).withRoutes({
+                    index: path.join('.', 'fixtures', 'indexed', 'indx')
                 });
             } catch (err) {
                 error = err;

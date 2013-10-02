@@ -52,6 +52,20 @@ enrouten(app).withRoutes({
 });
 ```
 
+- `index` (optional, overrides `directory` and disables scanning) - String path or array of path segments indicating
+the file to load which acts as the route 'index' of the application.
+
+```javascript
+// index.js
+module.exports = function (app) {
+
+    app.get('/', index);
+    app.get('/account', passport.protect, account);
+
+    // etc...
+};
+```
+
 ### Controller Files
 A 'controller' is defined as any javascript file (extension of `.js`) which exports a function that accepts a single argument.
 **NOTE: Any file in the directory tree that matches the API will be invoked/initialized with the express application object.**

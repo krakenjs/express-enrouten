@@ -5,11 +5,20 @@ var fs = require('fs'),
     assert = require('assert');
 
 
+function loaddir(directory) {
+    return scan(resolve(directory));
+}
+
 
 function scan(file, controllers) {
     var stats;
 
     controllers = controllers || [];
+    if (typeof file !== 'string') {
+        return controllers;
+    }
+
+    assert.ok(fs.existsSync(file), 'Route directory not found. (\'' + file + '\')');
 
     stats = fs.statSync(file);
     if (stats.isDirectory())  {
@@ -24,21 +33,18 @@ function scan(file, controllers) {
 }
 
 
-function loaddir(directory) {
-    if (!directory) {
-        return [];
+function resolve(file) {
+    if (!file) {
+        return undefined;
     }
 
-    if (Array.isArray(directory)) {
-        directory = path.join.apply(undefined, directory);
+    if (Array.isArray(file)) {
+        file = path.join.apply(undefined, file);
     }
 
-    directory = path.resolve(directory);
-    assert.ok(fs.existsSync(directory), 'Route directory not found. (\'' + directory + '\')');
-
-    return scan(directory);
+    file = path.resolve(file);
+    return file;
 }
-
 
 
 module.exports = function (app) {
@@ -48,6 +54,11 @@ module.exports = function (app) {
         withRoutes: function (settings) {
 
             settings = settings || {};
+
+            if (settings.index) {
+                require(resolve(settings.index))(app);
+                return;
+            }
 
             // Directory to scan for routes
             loaddir(settings.directory).forEach(function (file) {

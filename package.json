@@ -6,7 +6,7 @@
   "scripts": {
     "test": "make test"
   },
-  "repository": "git://github.paypal.com/webcore/express-enrouten.git",
+  "repository": "git://github.com/paypal/express-enrouten.git",
   "keywords": [
     "expressjs",
     "node",

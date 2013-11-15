@@ -7,6 +7,9 @@
     "test": "make test"
   },
   "repository": "git://github.com/paypal/express-enrouten.git",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "keywords": [
     "expressjs",
     "node",

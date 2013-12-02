@@ -1,4 +1,3 @@
-/***@@@ BEGIN LICENSE @@@***/
 /*───────────────────────────────────────────────────────────────────────────*\
 │  Copyright (C) 2013 eBay Software Foundation                                │
 │                                                                             │
@@ -16,12 +15,13 @@
 │   See the License for the specific language governing permissions and       │
 │   limitations under the License.                                            │
 \*───────────────────────────────────────────────────────────────────────────*/
-/***@@@ END LICENSE @@@***/
 'use strict';
 
 var fs = require('fs'),
     path = require('path'),
-    assert = require('assert');
+    assert = require('assert'),
+    express = require('express'),
+    suer;
 
 
 function loaddir(directory) {
@@ -65,37 +65,44 @@ function resolve(file) {
     return file;
 }
 
+function isExpress(app) {
+    return app.handle && app.set;
+}
 
 module.exports = function (app) {
+    var settings;
 
-    return {
+    function scan(settings) {
+        settings = settings || {};
 
-        withRoutes: function (settings) {
-
-            settings = settings || {};
-
-            if (settings.index) {
-                require(resolve(settings.index))(app);
-                return;
-            }
-
-            // Directory to scan for routes
-            loaddir(settings.directory).forEach(function (file) {
-                var controller = require(file);
-                if (typeof controller === 'function' && controller.length === 1) {
-                    controller(app);
-                }
-            });
-
-            (settings.routes || []).forEach(function (def) {
-                assert.ok(def.path, 'path is required');
-                assert.ok(typeof def.handler === 'function', 'handler is required');
-
-                var method = (def.method || 'get').toLowerCase();
-                app[method](def.path, def.handler);
-            });
-
+        if (settings.index) {
+            require(resolve(settings.index))(app);
+            return;
         }
-    };
 
+        // Directory to scan for routes
+        loaddir(settings.directory).forEach(function (file) {
+            var controller = require(file);
+            if (typeof controller === 'function' && controller.length === 1) {
+                controller(app);
+            }
+        });
+
+        (settings.routes || []).forEach(function (def) {
+            assert.ok(def.path, 'path is required');
+            assert.ok(typeof def.handler === 'function', 'handler is required');
+
+            var method = (def.method || 'get').toLowerCase();
+            app[method](def.path, def.handler);
+        });
+    }
+
+    if (isExpress(app)) {
+        return { withRoutes: scan };
+    }
+
+    settings = app;
+    app = express();
+    scan(settings);
+    return app;
 };

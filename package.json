@@ -29,6 +29,8 @@
     "chai": "~1.5.0",
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.7.0",
-    "grunt-mocha-test": "~0.7.0"
+    "grunt-mocha-test": "~0.7.0",
+    "express": "~3.4.6",
+    "supertest": "~0.8.2"
   }
 }

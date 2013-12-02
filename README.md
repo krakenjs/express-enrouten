@@ -6,22 +6,31 @@ Route configuration middleware for expressjs.
 
 
 ### API
-#### `enrouten(app).withRoutes(options)`
+#### `app.use(enrouten(options))`
 ```javascript
 var express = require('express'),
     enrouten = require('express-enrouten');
 
 var app = express();
-enrouten(app).withRoutes({ ... });
+express.use(enrouten({ ... });
+```
+
+
+~~#### `enrouten(app).withRoutes(options)`~~
+```javascript
+var express = require('express'),
+    enrouten = require('express-enrouten');
+
+// Legacy API - do not use
+//var app = express();
+//enrouten(app).withRoutes({ ... });
 ```
 
 
 ### Configuration
 express-enrouten supports routes via configuration and convention.
 ```javascript
-enrouten(app).withRoutes({
-    directory: 'controllers',
-    routes: [{
+app.use(enrouten({
         method: 'get',
         path: '/foo',
         handler: function (req, res) {
@@ -35,7 +44,7 @@ enrouten(app).withRoutes({
 to find files that match the controller-spec API.
 
 ```javascript
-enrouten(app).withRoutes({
+app.use(enrouten({
     directory: 'controllers'
 });
 ```
@@ -44,7 +53,7 @@ enrouten(app).withRoutes({
 can have an optional `method` property (`method` defaults to 'GET').
 
 ```javascript
-enrouten(app).withRoutes({
+app.use(enrouten({
     routes: [
         { path: '/',    method: 'GET', handler: require('./controllers/index') },
         { path: '/foo', method: 'GET', handler: require('./controllers/foo') }

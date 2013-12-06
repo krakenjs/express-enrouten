@@ -3,4 +3,4 @@
 -
 
 **Features**
--
+- Add more sane API: `app.use(enrouten(settings));`

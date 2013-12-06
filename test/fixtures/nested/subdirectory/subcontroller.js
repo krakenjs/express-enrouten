@@ -4,7 +4,7 @@
 module.exports = function (app) {
 
     app.get('/sub', function (req, res) {
-
+        res.send('ok');
     });
 
 };

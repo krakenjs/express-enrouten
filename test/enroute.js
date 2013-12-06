@@ -3,387 +3,338 @@
 
 var path = require('path'),
     assert = require('chai').assert,
+    express = require('express'),
+    request = require('supertest'),
     enrouten = require('../index');
 
 
 describe('express-enrouten', function () {
-
 
     before(function () {
         process.chdir(__dirname);
     });
 
 
-    it('should handle random config settings', function () {
-
-        enrouten({}).withRoutes({});
-
-        enrouten({}).withRoutes({
-            directory: null
-        });
-
-        enrouten({}).withRoutes({
-            index: null
-        });
-
-        enrouten({}).withRoutes({
-            routes: null
-        });
-
-        enrouten({}).withRoutes({
-            routes: []
-        });
-
-    });
+    function get(app, route, next) {
+        request(app)
+            .get(route)
+            .expect('Content-Type', /html/)
+            .expect(200, 'ok', next);
+    }
 
 
-    describe('directory', function () {
+    function test(name, fn) {
 
+        describe(name, function () {
 
-        it('should scan a relative path', function () {
-            var initialized, shim;
+            it('should handle random config settings', function () {
+                var app;
 
-            initialized = false;
+                app = express();
+                fn(app, {});
 
-            shim = {
-                get: function () {
-                    initialized = true;
-                }
-            };
+                app = express();
+                fn(app, { directory: null });
 
-            enrouten(shim).withRoutes({
-                directory: path.join('.', 'fixtures', 'flat')
+                app = express();
+                fn(app, { index: null });
+
+                app = express();
+                fn(app, { routes: null });
+
+                app = express();
+                fn(app, { routes: [] });
             });
 
-            assert.ok(initialized);
-        });
 
+            describe('directory', function () {
 
-        it('should scan an absolute path', function () {
-            var initialized, shim;
+                it('should scan a relative path', function (next) {
+                    var app = express();
 
-            initialized = false;
+                    fn(app, {
+                        directory: path.join('.', 'fixtures', 'flat')
+                    });
 
-            shim = {
-                get: function () {
-                    initialized = true;
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                directory: path.join(process.cwd(), 'fixtures', 'flat')
-            });
-
-            assert.ok(initialized);
-        });
-
-
-        it('should throw when scanning an invalid path', function () {
-            var error, initialized, shim;
-
-            initialized = false;
-            shim = {
-                get: function () {
-                    initialized = true;
-                }
-            };
-
-            try {
-                enrouten(shim).withRoutes({
-                    directory: path.join(process.cwd(), 'fixtures', 'whatthewhat')
+                    get(app, '/', next);
                 });
-            } catch (err) {
-                error = err;
-            }
-
-            assert.ok(error);
-        });
 
 
-        it('should traverse a nested directory structure', function () {
-            var error, initialized, shim;
+                it('should scan an absolute path', function (next) {
+                    var app = express();
 
-            initialized = [];
-            shim = {
-                get: function () {
-                    initialized.push(initialized.length);
-                }
-            };
+                    fn(app, {
+                        directory: path.join(process.cwd(), 'fixtures', 'flat')
+                    });
 
-            enrouten(shim).withRoutes({
-                directory: path.join(process.cwd(), 'fixtures', 'nested')
-            });
-
-            assert.strictEqual(initialized.length, 2);
-        });
-
-
-        it('should ignore files/definitions that don\'t match the published API', function () {
-            var error, initialized, shim;
-
-            initialized = [];
-            shim = {
-                get: function () {
-                    initialized.push(initialized.length);
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                directory: path.join(process.cwd(), 'fixtures', 'superfluous')
-            });
-
-            assert.strictEqual(initialized.length, 2);
-        });
-
-    });
-
-
-    describe('routes', function () {
-
-        it('should handle a route definition', function () {
-            var initialized, shim;
-
-            initialized = [];
-            shim = {
-                get: function () {
-                    initialized.push(initialized.length);
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                routes: [{
-                    path: '/',
-                    method: 'GET',
-                    handler: function (req, res) {
-                        // ...
-                    }
-                }]
-            });
-
-            assert.strictEqual(initialized.length, 1);
-        });
-
-
-        it('should handle multiple route definitions', function () {
-            var initialized, shim;
-
-            initialized = [];
-            shim = {
-                get: function () {
-                    initialized.push(initialized.length);
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                routes: [
-                    {
-                        path: '/',
-                        method: 'GET',
-                        handler: function (req, res) {
-                            // ...
-                        }
-                    },
-                    {
-                        path: '/foo',
-                        method: 'get',
-                        handler: function (req, res) {
-                            // ...
-                        }
-                    }
-                ]
-            });
-
-            assert.strictEqual(initialized.length, 2);
-        });
-
-
-        it('should default the method to `get`', function () {
-            var initialized, shim;
-
-            initialized = [];
-            shim = {
-                get: function () {
-                    initialized.push(initialized.length);
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                routes: [
-                    {
-                        path: '/',
-                        handler: function (req, res) {
-                            // ...
-                        }
-                    },
-                    {
-                        path: '/foo',
-                        method: 'get',
-                        handler: function (req, res) {
-                            // ...
-                        }
-                    }
-                ]
-            });
-
-            assert.strictEqual(initialized.length, 2);
-        });
-
-
-        it('should handle multiple methods', function () {
-            var initialized, shim;
-
-            initialized = [];
-            shim = {
-                get: function () {
-                    initialized.push(initialized.length);
-                },
-                post: function () {
-                    initialized.push(initialized.length);
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                routes: [
-                    {
-                        path: '/',
-                        method: 'post',
-                        handler: function (req, res) {
-                            // ...
-                        }
-                    },
-                    {
-                        path: '/foo',
-                        method: 'get',
-                        handler: function (req, res) {
-                            // ...
-                        }
-                    }
-                ]
-            });
-
-            assert.strictEqual(initialized.length, 2);
-        });
-
-
-        it('should error on missing path', function () {
-            var shim, error;
-
-            shim = {
-                get: function () {
-                    // ...
-                }
-            };
-
-            try {
-                enrouten(shim).withRoutes({
-                    routes: [
-                        {
-                            method: 'get',
-                            handler: function () {
-                                // ...
-                            }
-                        }
-                    ]
+                    get(app, '/', next);
                 });
-            } catch (err) {
-                error = err;
-            }
-
-            assert.ok(error);
-        });
 
 
-        it('should error on missing handler', function () {
-            var shim, error;
+                it('should throw when scanning an invalid path', function () {
+                    var error;
 
-            shim = {
-                get: function () {
-                    // ...
-                }
-            };
+                    try {
+                        fn(express(), {
+                            directory: path.join(process.cwd(), 'fixtures', 'whatthewhat')
+                        });
+                    } catch (err) {
+                        error = err;
+                    }
 
-            try {
-                enrouten(shim).withRoutes({
-                    routes: [
-                        {
+                    assert.ok(error);
+                });
+
+
+                it('should traverse a nested directory structure', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        directory: path.join(process.cwd(), 'fixtures', 'nested')
+                    });
+
+                    get(app, '/', function (err) {
+                        assert.ok(!err);
+                        get(app, '/sub', next);
+                    });
+                });
+
+
+                it('should ignore files/definitions that don\'t match the published API', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        directory: path.join(process.cwd(), 'fixtures', 'superfluous')
+                    });
+
+                    get(app, '/', function (err) {
+                        assert.ok(!err);
+                        get(app, '/sub', next);
+                    });
+                });
+
+            });
+
+
+            describe('routes', function () {
+
+                it('should handle a route definition', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        routes: [{
                             path: '/',
-                            method: 'get'
-                        }
-                    ]
+                            method: 'GET',
+                            handler: function (req, res) {
+                                res.send('ok');
+                            }
+                        }]
+                    });
+
+                    get(app, '/', next);
                 });
-            } catch (err) {
-                error = err;
-            }
 
-            assert.ok(error);
+
+                it('should handle multiple route definitions', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        routes: [
+                            {
+                                path: '/',
+                                method: 'GET',
+                                handler: function (req, res) {
+                                    res.send('ok');
+                                }
+                            },
+                            {
+                                path: '/sub',
+                                method: 'get',
+                                handler: function (req, res) {
+                                    res.send('ok');
+                                }
+                            }
+                        ]
+                    });
+
+                    get(app, '/', function (err) {
+                        assert.ok(!err);
+                        get(app, '/sub', next);
+                    });
+                });
+
+
+                it('should default the method to `get`', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        routes: [
+                            {
+                                path: '/',
+                                handler: function (req, res) {
+                                    res.send('ok');
+                                }
+                            },
+                            {
+                                path: '/sub',
+                                method: 'get',
+                                handler: function (req, res) {
+                                    res.send('ok');
+                                }
+                            }
+                        ]
+                    });
+
+                    get(app, '/', function (err) {
+                        assert.ok(!err);
+                        get(app, '/sub', next);
+                    });
+                });
+
+
+                it('should handle multiple methods', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        routes: [
+                            {
+                                path: '/',
+                                method: 'post',
+                                handler: function (req, res) {
+                                    res.send('ok');
+                                }
+                            },
+                            {
+                                path: '/sub',
+                                method: 'get',
+                                handler: function (req, res) {
+                                    res.send('ok');
+                                }
+                            }
+                        ]
+                    });
+
+
+                    get(app, '/sub', function (err) {
+                        assert.ok(!err);
+                        request(app)
+                            .post('/')
+                            .expect('Content-Type', /html/)
+                            .expect(200, 'ok', next);
+                    });
+                });
+
+
+                it('should error on missing path', function () {
+                    var error;
+
+                    try {
+                        fn(express(), {
+                            routes: [
+                                {
+                                    method: 'get',
+                                    handler: function () {
+                                        // ...
+                                    }
+                                }
+                            ]
+                        });
+                    } catch (err) {
+                        error = err;
+                    }
+
+                    assert.ok(error);
+                });
+
+
+                it('should error on missing handler', function () {
+                    var error;
+
+                    try {
+                        fn(express(), {
+                            routes: [
+                                {
+                                    path: '/',
+                                    method: 'get'
+                                }
+                            ]
+                        });
+                    } catch (err) {
+                        error = err;
+                    }
+
+                    assert.ok(error);
+                });
+
+            });
+
+
+            describe('index', function () {
+
+                it('should only load the automatic index file', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        index: path.join('.', 'fixtures', 'indexed')
+                    });
+
+                    get(app, '/good', function (err) {
+                        assert.ok(!err);
+                        get(app, '/subgood', next);
+                    });
+                });
+
+                it('should only load the automatic explicit index file', function () {
+                    var initialized, shim;
+
+                    initialized = [];
+                    shim = express();
+                    shim.get = function (path) {
+                        initialized.push(path);
+                    };
+
+                    enrouten(shim).withRoutes({
+                        index: path.join('.', 'fixtures', 'indexed', 'index')
+                    });
+
+                    assert.strictEqual(initialized.length, 2);
+                    assert.strictEqual(initialized[0], '/good');
+                    assert.strictEqual(initialized[1], '/subgood');
+                });
+
+
+                it('should not load missing index file', function () {
+                    var error, shim;
+
+                    shim = express();
+                    shim.get = function (path) {
+                        // ...
+                    };
+
+                    try {
+                        fn(shim, {
+                            index: path.join('.', 'fixtures', 'indexed', 'indx')
+                        });
+                    } catch (err) {
+                        error = err;
+                    }
+
+                    assert.ok(error);
+                });
+
+            });
+
         });
+    }
 
+
+    test('new api', function (app, settings) {
+        app.use(enrouten(settings));
     });
 
 
-    describe('index', function () {
-
-        it('should only load the automatic index file', function () {
-            var initialized, shim;
-
-            initialized = [];
-
-            shim = {
-                get: function (path) {
-                    initialized.push(path);
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                index: path.join('.', 'fixtures', 'indexed')
-            });
-
-            assert.strictEqual(initialized.length, 2);
-            assert.strictEqual(initialized[0], '/good');
-            assert.strictEqual(initialized[1], '/subgood');
-        });
-
-        it('should only load the automatic explicit index file', function () {
-            var initialized, shim;
-
-            initialized = [];
-
-            shim = {
-                get: function (path) {
-                    initialized.push(path);
-                }
-            };
-
-            enrouten(shim).withRoutes({
-                index: path.join('.', 'fixtures', 'indexed', 'index')
-            });
-
-            assert.strictEqual(initialized.length, 2);
-            assert.strictEqual(initialized[0], '/good');
-            assert.strictEqual(initialized[1], '/subgood');
-        });
-
-
-        it('should not load missing index file', function () {
-            var error, shim;
-
-            shim = {
-                get: function (path) {
-                    // ...
-                }
-            };
-
-            try {
-                enrouten(shim).withRoutes({
-                    index: path.join('.', 'fixtures', 'indexed', 'indx')
-                });
-            } catch (err) {
-                error = err;
-            }
-
-            assert.ok(error);
-        });
-
+    test('original api', function (app, settings) {
+        enrouten(app).withRoutes(settings);
     });
 
 });

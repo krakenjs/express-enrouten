@@ -337,4 +337,28 @@ describe('express-enrouten', function () {
         enrouten(app).withRoutes(settings);
     });
 
+
+    describe('mounting', function () {
+
+        it('should inherit all settings from parent app', function () {
+            var parent, child;
+
+            child = enrouten({});
+
+            parent = express();
+            parent.set('views', '/dev/null');
+            parent.use(child);
+
+            assert.strictEqual(child.get('views'), parent.get('views'));
+            assert.strictEqual(child.get('jsonp callback name'), 'callback');
+
+            parent.set('jsonp callback name', 'jsonp');
+            assert.strictEqual(child.get('jsonp callback name'), 'jsonp');
+
+            child.set('view', {});
+            assert(child.get('view') !== parent.get('view'));
+        });
+
+    });
+
 });

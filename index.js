@@ -104,13 +104,13 @@ module.exports = function (app) {
     app = express();
     scan(settings);
 
-    app.on('mount', function (parent) {
+    app.once('mount', function (parent) {
         // Reset all mounted app settings to inherit from parent.
         // This way, all changes to parent will be picked up by
         // mounted apps, but config of mounted apps will be localized
         // to that app.
         app.settings = Object.create(parent.settings);
     });
-    
+
     return app;
 };

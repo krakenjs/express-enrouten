@@ -12,7 +12,7 @@ var express = require('express'),
     enrouten = require('express-enrouten');
 
 var app = express();
-express.use(enrouten({ ... });
+app.use(enrouten({ ... });
 ```
 
 

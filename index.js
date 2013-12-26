@@ -81,7 +81,12 @@ module.exports = function (app) {
 
         // Directory to scan for routes
         loaddir(settings.directory).forEach(function (file) {
-            var controller = require(file);
+            try {
+                var controller = require(file);
+            } catch(e) {
+                console.log(e.trace);
+                process.exit(1);
+            }
             if (typeof controller === 'function' && controller.length === 1) {
                 controller(app);
             }

@@ -110,6 +110,7 @@ module.exports = function (app) {
         // mounted apps, but config of mounted apps will be localized
         // to that app.
         app.settings = Object.create(parent.settings);
+        app.engines = Object.create(parent.engines);
     });
 
     return app;

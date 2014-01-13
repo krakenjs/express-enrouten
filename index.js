@@ -27,6 +27,21 @@ function loaddir(directory) {
     return scan(resolve(directory));
 }
 
+function tryResolve(file) {
+    try {
+        // remove the file extension
+        var ext = path.extname(file);
+        if (ext) {
+            file = file.replace(new RegExp('\\' + ext + '$'), '');
+        }
+        // and use require.extensions to resolve known file types eg. CoffeeScript
+        require.resolve(file);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
 
 function scan(file, controllers) {
     var stats;
@@ -43,7 +58,7 @@ function scan(file, controllers) {
         fs.readdirSync(file).forEach(function (child) {
             scan(path.join(file, child), controllers);
         });
-    } else if (stats.isFile() && file.match(/\.js$/i)) {
+    } else if (stats.isFile() && tryResolve(file)) {
         controllers.push(file);
     }
 

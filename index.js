@@ -71,9 +71,7 @@ function isExpress(app) {
 module.exports = function (app) {
     var settings;
 
-    function scan(settings) {
-        settings = settings || {};
-
+    function scan(app, settings) {
         if (settings.index) {
             require(resolve(settings.index))(app);
             return;
@@ -96,22 +94,24 @@ module.exports = function (app) {
         });
     }
 
+    function legacy(app) {
+        return scan.bind(null, app);
+    }
+
+    function mount(settings) {
+        return function onmount(app) {
+            // Remove sacrificial express app
+            app.stack.pop();
+            scan(app, settings);
+        };
+    }
+
     if (isExpress(app)) {
-        return { withRoutes: scan };
+        return { withRoutes: legacy(app) };
     }
 
     settings = app;
     app = express();
-    scan(settings);
-
-    app.once('mount', function (parent) {
-        // Reset all mounted app settings to inherit from parent.
-        // This way, all changes to parent will be picked up by
-        // mounted apps, but config of mounted apps will be localized
-        // to that app.
-        app.settings = Object.create(parent.settings);
-        app.engines = Object.create(parent.engines);
-    });
-
+    app.once('mount', mount(settings));
     return app;
 };

@@ -120,6 +120,7 @@ module.exports = function (app) {
     }
 
     if (isExpress(app)) {
+        console.warn('This API has been deprecated and will be removed in future versions. Use `app.use(enrouten(options))`.');
         return { withRoutes: legacy(app) };
     }
 

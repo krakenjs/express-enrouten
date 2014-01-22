@@ -102,6 +102,19 @@ module.exports = function (app) {
         return function onmount(app) {
             // Remove sacrificial express app
             app.stack.pop();
+
+            // Reorganize stack to place router in correct place
+            // This could get out of whack if someone registers
+            // directly against express prior to calling enrouten
+            app.stack.some(function (middleware, idx, stack) {
+                if (middleware.handle.name === 'router') {
+                    stack.splice(idx, 1);
+                    stack.push(middleware);
+                    return true;
+                }
+                return false;
+            });
+
             scan(app, settings);
         };
     }

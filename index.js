@@ -71,9 +71,7 @@ function isExpress(app) {
 module.exports = function (app) {
     var settings;
 
-    function scan(settings) {
-        settings = settings || {};
-
+    function scan(app, settings) {
         if (settings.index) {
             require(resolve(settings.index))(app);
             return;
@@ -96,21 +94,38 @@ module.exports = function (app) {
         });
     }
 
+    function legacy(app) {
+        return scan.bind(null, app);
+    }
+
+    function mount(settings) {
+        return function onmount(app) {
+            // Remove sacrificial express app
+            app.stack.pop();
+
+            // Reorganize stack to place router in correct place
+            // This could get out of whack if someone registers
+            // directly against express prior to calling enrouten
+            app.stack.some(function (middleware, idx, stack) {
+                if (middleware.handle.name === 'router') {
+                    stack.splice(idx, 1);
+                    stack.push(middleware);
+                    return true;
+                }
+                return false;
+            });
+
+            scan(app, settings);
+        };
+    }
+
     if (isExpress(app)) {
-        return { withRoutes: scan };
+        console.warn('This API has been deprecated and will be removed in future versions. Use `app.use(enrouten(options))`.');
+        return { withRoutes: legacy(app) };
     }
 
     settings = app;
     app = express();
-    scan(settings);
-
-    app.once('mount', function (parent) {
-        // Reset all mounted app settings to inherit from parent.
-        // This way, all changes to parent will be picked up by
-        // mounted apps, but config of mounted apps will be localized
-        // to that app.
-        app.settings = Object.create(parent.settings);
-    });
-
+    app.once('mount', mount(settings));
     return app;
 };

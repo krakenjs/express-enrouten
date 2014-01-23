@@ -23,6 +23,11 @@ describe('express-enrouten', function () {
     }
 
 
+    function noop(req, res, next) {
+        next();
+    }
+
+
     function test(name, fn) {
 
         describe(name, function () {
@@ -111,6 +116,42 @@ describe('express-enrouten', function () {
                         assert.ok(!err);
                         get(app, '/sub', next);
                     });
+                });
+
+
+                it('should remove itself', function (next) {
+                    var app = express();
+
+                    fn(app, {
+                        directory: path.join('.', 'fixtures', 'flat')
+                    });
+
+                    // Removes enrouten, but adds `router`, so 3
+                    assert.equal(app.stack.length, 3);
+                    next();
+                });
+
+
+                it('should reorder router to where/when enrouten is invoked', function (next) {
+                    var app;
+
+                    // XXX: This test is only applicable for new implementation/API.
+                    if (fn.name !== 'refactor') {
+                        next();
+                        return;
+                    }
+
+                    app = express();
+                    app.get('/', noop);
+                    app.use(express.static('./public'));
+
+                    fn(app, {
+                        directory: path.join('.', 'fixtures', 'flat')
+                    });
+
+                    assert.equal(app.stack.length, 4);
+                    assert.equal(app.stack[3].handle.name, 'router');
+                    next();
                 });
 
             });
@@ -328,37 +369,13 @@ describe('express-enrouten', function () {
     }
 
 
-    test('new api', function (app, settings) {
+    test('new api', function refactor(app, settings) {
         app.use(enrouten(settings));
     });
 
 
-    test('original api', function (app, settings) {
+    test('original api', function legacy(app, settings) {
         enrouten(app).withRoutes(settings);
-    });
-
-
-    describe('mounting', function () {
-
-        it('should inherit all settings from parent app', function () {
-            var parent, child;
-
-            child = enrouten({});
-
-            parent = express();
-            parent.set('views', '/dev/null');
-            parent.use(child);
-
-            assert.strictEqual(child.get('views'), parent.get('views'));
-            assert.strictEqual(child.get('jsonp callback name'), 'callback');
-
-            parent.set('jsonp callback name', 'jsonp');
-            assert.strictEqual(child.get('jsonp callback name'), 'jsonp');
-
-            child.set('view', {});
-            assert(child.get('view') !== parent.get('view'));
-        });
-
     });
 
 });

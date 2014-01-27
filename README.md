@@ -5,7 +5,7 @@ Route configuration middleware for expressjs.
 
 
 [![Build Status](https://travis-ci.org/paypal/express-enrouten.png)](https://travis-ci.org/paypal/express-enrouten)
-
+[![NPM version](https://badge.fury.io/js/express-enrouten.png)](http://badge.fury.io/js/express-enrouten)
 
 ### API
 #### `app.use(enrouten(options))`

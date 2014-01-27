@@ -1,8 +1,10 @@
 express-enrouten
 ==================
 
-
 Route configuration middleware for expressjs.
+
+
+[![Build Status](https://travis-ci.org/paypal/express-enrouten.png)](https://travis-ci.org/paypal/express-enrouten)
 
 
 ### API

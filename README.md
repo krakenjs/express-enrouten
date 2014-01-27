@@ -18,7 +18,7 @@ app.use(enrouten({ ... });
 ```
 
 
-~~#### `enrouten(app).withRoutes(options)`~~
+#### **Deprecated:** ~~`enrouten(app).withRoutes(options)`~~
 ```javascript
 var express = require('express'),
     enrouten = require('express-enrouten');

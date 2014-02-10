@@ -1,3 +1,11 @@
+##### v0.2.1 - 20140210
+**Bugs**
+- Fix order of scanning and router placement to ensure middleware comes before router.
+- Fix file scanning to support all registered/supported Node.js file extensions.
+
+**Features**
+- n/a
+
 ##### v0.2.0 - 20140127
 **Bugs**
 - n/a

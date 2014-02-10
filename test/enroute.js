@@ -28,7 +28,9 @@ describe('express-enrouten', function () {
     }
 
 
-    function test(name, fn) {
+    function test(name, fn, route) {
+
+        route = route || '/';
 
         describe(name, function () {
 
@@ -61,7 +63,7 @@ describe('express-enrouten', function () {
                         directory: path.join('.', 'fixtures', 'flat')
                     });
 
-                    get(app, '/', next);
+                    get(app, route, next);
                 });
 
 
@@ -72,7 +74,7 @@ describe('express-enrouten', function () {
                         directory: path.join(process.cwd(), 'fixtures', 'flat')
                     });
 
-                    get(app, '/', next);
+                    get(app, route, next);
                 });
 
 
@@ -98,9 +100,9 @@ describe('express-enrouten', function () {
                         directory: path.join(process.cwd(), 'fixtures', 'nested')
                     });
 
-                    get(app, '/', function (err) {
+                    get(app, route, function (err) {
                         assert.ok(!err);
-                        get(app, '/sub', next);
+                        get(app, route + 'sub', next);
                     });
                 });
 
@@ -112,9 +114,9 @@ describe('express-enrouten', function () {
                         directory: path.join(process.cwd(), 'fixtures', 'superfluous')
                     });
 
-                    get(app, '/', function (err) {
+                    get(app, route, function (err) {
                         assert.ok(!err);
-                        get(app, '/sub', next);
+                        get(app, route + 'sub', next);
                     });
                 });
 
@@ -142,7 +144,7 @@ describe('express-enrouten', function () {
                     }
 
                     app = express();
-                    app.get('/', noop);
+                    app.get(route, noop);
                     app.use(express.static('./public'));
 
                     fn(app, {
@@ -165,7 +167,7 @@ describe('express-enrouten', function () {
                     }
 
                     app = express();
-                    app.get('/', noop);
+                    app.get(route, noop);
                     app.use(express.static('./public'));
 
                     fn(app, {
@@ -175,7 +177,7 @@ describe('express-enrouten', function () {
                     assert.equal(app.stack.length, 5);
                     assert.equal(app.stack[4].handle.name, 'router');
 
-                    get(app, '/foo', function (err) {
+                    get(app, route + 'foo', function (err) {
                         assert.ok(!err);
                         next();
                     });
@@ -199,7 +201,7 @@ describe('express-enrouten', function () {
                         }]
                     });
 
-                    get(app, '/', next);
+                    get(app, route, next);
                 });
 
 
@@ -225,9 +227,9 @@ describe('express-enrouten', function () {
                         ]
                     });
 
-                    get(app, '/', function (err) {
+                    get(app, route, function (err) {
                         assert.ok(!err);
-                        get(app, '/sub', next);
+                        get(app, route + 'sub', next);
                     });
                 });
 
@@ -253,9 +255,9 @@ describe('express-enrouten', function () {
                         ]
                     });
 
-                    get(app, '/', function (err) {
+                    get(app, route, function (err) {
                         assert.ok(!err);
-                        get(app, '/sub', next);
+                        get(app, route + 'sub', next);
                     });
                 });
 
@@ -283,10 +285,10 @@ describe('express-enrouten', function () {
                     });
 
 
-                    get(app, '/sub', function (err) {
+                    get(app, route + 'sub', function (err) {
                         assert.ok(!err);
                         request(app)
-                            .post('/')
+                            .post(route)
                             .expect('Content-Type', /html/)
                             .expect(200, 'ok', next);
                     });
@@ -322,7 +324,7 @@ describe('express-enrouten', function () {
                         fn(express(), {
                             routes: [
                                 {
-                                    path: '/',
+                                    path: route,
                                     method: 'get'
                                 }
                             ]
@@ -346,12 +348,13 @@ describe('express-enrouten', function () {
                         index: path.join('.', 'fixtures', 'indexed')
                     });
 
-                    get(app, '/good', function (err) {
+                    get(app, route + 'good', function (err) {
                         assert.ok(!err);
-                        get(app, '/subgood', next);
+                        get(app, route + 'subgood', next);
                     });
                 });
 
+                
                 it('should only load the automatic explicit index file', function () {
                     var initialized, shim;
 
@@ -400,6 +403,9 @@ describe('express-enrouten', function () {
         app.use(enrouten(settings));
     });
 
+    test('new api with route', function refactor(app, settings) {
+        app.use('/foo', enrouten(settings));
+    }, '/foo/');
 
     test('original api', function legacy(app, settings) {
         enrouten(app).withRoutes(settings);

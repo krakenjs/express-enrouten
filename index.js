@@ -114,19 +114,25 @@ module.exports = function (app) {
     }
 
     function mount(settings) {
-        return function onmount(app) {
+        return function onmount(parent) {
             // Remove sacrificial express app
-            app.stack.pop();
+            parent.stack.pop();
 
-            scan(app, settings);
+            scan(parent, settings);
 
             // Reorganize stack to place router in correct place
             // This could get out of whack if someone registers
             // directly against express prior to calling enrouten.
             // This is done *after* scanning so any middleware registered
             // during scanning is correctly put before the router.
-            app.stack.some(function (middleware, idx, stack) {
+            parent.stack.some(function (middleware, idx, stack) {
                 if (middleware.handle.name === 'router') {
+                    // If a route was specified when mounting, update the
+                    // router middleware to only respond to that route.
+                    // e.g. app.use('/foo', enrouten()) is akin to app.use('/foo', app.router);
+                    middleware.route = app.route !== '/' ? app.route : '';
+
+                    // Reorder stack
                     stack.splice(idx, 1);
                     stack.push(middleware);
                     return true;

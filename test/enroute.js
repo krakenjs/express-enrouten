@@ -154,6 +154,33 @@ describe('express-enrouten', function () {
                     next();
                 });
 
+
+                it('should do reordering after scanning to allow scanned files to register middleware', function (next) {
+                    var app;
+
+                    // XXX: This test is only applicable for new implementation/API.
+                    if (fn.name !== 'refactor') {
+                        next();
+                        return;
+                    }
+
+                    app = express();
+                    app.get('/', noop);
+                    app.use(express.static('./public'));
+
+                    fn(app, {
+                        directory: path.join('.', 'fixtures', 'middleware')
+                    });
+
+                    assert.equal(app.stack.length, 5);
+                    assert.equal(app.stack[4].handle.name, 'router');
+
+                    get(app, '/foo', function (err) {
+                        assert.ok(!err);
+                        next();
+                    });
+                });
+
             });
 
 

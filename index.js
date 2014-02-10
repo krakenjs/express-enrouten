@@ -118,9 +118,13 @@ module.exports = function (app) {
             // Remove sacrificial express app
             app.stack.pop();
 
+            scan(app, settings);
+
             // Reorganize stack to place router in correct place
             // This could get out of whack if someone registers
-            // directly against express prior to calling enrouten
+            // directly against express prior to calling enrouten.
+            // This is done *after* scanning so any middleware registered
+            // during scanning is correctly put before the router.
             app.stack.some(function (middleware, idx, stack) {
                 if (middleware.handle.name === 'router') {
                     stack.splice(idx, 1);
@@ -129,8 +133,6 @@ module.exports = function (app) {
                 }
                 return false;
             });
-
-            scan(app, settings);
         };
     }
 

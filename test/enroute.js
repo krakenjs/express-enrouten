@@ -354,7 +354,7 @@ describe('express-enrouten', function () {
                     });
                 });
 
-                
+
                 it('should only load the automatic explicit index file', function () {
                     var initialized, shim;
 

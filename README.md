@@ -19,27 +19,18 @@ app.use(enrouten({ ... }));
 ```
 
 
-#### **Deprecated:** ~~`enrouten(app).withRoutes(options)`~~
-```javascript
-var express = require('express'),
-    enrouten = require('express-enrouten');
-
-// Legacy API - do not use
-//var app = express();
-//enrouten(app).withRoutes({ ... });
-```
-
-
 ### Configuration
 express-enrouten supports routes via configuration and convention.
 ```javascript
 app.use(enrouten({
-        method: 'get',
-        path: '/foo',
-        handler: function (req, res) {
-            // ...
-        }
-    }]
+        routes: [{
+            method: 'GET',
+            path: '/foo',
+            handler: function (req, res) {
+                // ...
+            }
+        }]
+    }
 });
 ```
 

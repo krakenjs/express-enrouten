@@ -229,7 +229,22 @@ describe('express-enrouten', function () {
 
                     get(app, route, function (err) {
                         assert.ok(!err);
-                        get(app, route + 'sub', next);
+                        get(app, route + 'sub', function (err) {
+                            assert.ok(!err);
+
+                            // XXX - Check the base path for the text
+                            // This special-casing is getting ugly and will be removed
+                            // when legacy support is dropped in the next revision.
+                            if (fn.name === 'refactor' && route !== '/') {
+                                get(app, '/sub', function (err) {
+                                    assert.ok(err);
+                                    next();
+                                });
+                            } else {
+                                next();
+                            }
+
+                        });
                     });
                 });
 

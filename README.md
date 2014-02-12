@@ -14,7 +14,8 @@ var express = require('express'),
     enrouten = require('express-enrouten');
 
 var app = express();
-app.use(enrouten({ ... });
+app.use(enrouten({ ... }));
+// or app.use('/foo', enrouten({ ... }));
 ```
 
 

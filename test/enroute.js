@@ -137,12 +137,6 @@ describe('express-enrouten', function () {
                 it('should reorder router to where/when enrouten is invoked', function (next) {
                     var app;
 
-                    // XXX: This test is only applicable for new implementation/API.
-                    if (fn.name !== 'refactor') {
-                        next();
-                        return;
-                    }
-
                     app = express();
                     app.get(route, noop);
                     app.use(express.static('./public'));
@@ -159,12 +153,6 @@ describe('express-enrouten', function () {
 
                 it('should do reordering after scanning to allow scanned files to register middleware', function (next) {
                     var app;
-
-                    // XXX: This test is only applicable for new implementation/API.
-                    if (fn.name !== 'refactor') {
-                        next();
-                        return;
-                    }
 
                     app = express();
                     app.get(route, noop);
@@ -232,10 +220,8 @@ describe('express-enrouten', function () {
                         get(app, route + 'sub', function (err) {
                             assert.ok(!err);
 
-                            // XXX - Check the base path for the text
-                            // This special-casing is getting ugly and will be removed
-                            // when legacy support is dropped in the next revision.
-                            if (fn.name === 'refactor' && route !== '/') {
+                            // XXX - Only test path without route if other than '/'
+                            if (route !== '/') {
                                 get(app, '/sub', function (err) {
                                     assert.ok(err);
                                     next();
@@ -379,7 +365,7 @@ describe('express-enrouten', function () {
                         initialized.push(path);
                     };
 
-                    enrouten(shim).withRoutes({
+                    fn(shim, {
                         index: path.join('.', 'fixtures', 'indexed', 'index')
                     });
 
@@ -421,9 +407,5 @@ describe('express-enrouten', function () {
     test('new api with route', function refactor(app, settings) {
         app.use('/foo', enrouten(settings));
     }, '/foo/');
-
-    test('original api', function legacy(app, settings) {
-        enrouten(app).withRoutes(settings);
-    });
 
 });

@@ -23,18 +23,30 @@ var fs = require('fs'),
     express = require('express');
 
 
-function loaddir(directory) {
-    return scan(resolve(directory));
+/**
+ * Resolve and recursively scan the provided directory
+ * @param dir the directory to scan.
+ * @returns {Array} absolute file paths that are able to be loaded by Node code.
+ */
+function loaddir(dir) {
+    return scan(resolve(dir));
 }
 
-function tryResolve(file) {
+
+/**
+ * Returns true if `require` is able to load the provided file
+ * or false if not.
+ * http://nodejs.org/api/modules.html#modules_file_modules
+ * @param file the file for which to determine module-ness.
+ * @returns {boolean}
+ */
+function isFileModule(file) {
+    var ext = path.extname(file);
+
     try {
-        // remove the file extension
-        var ext = path.extname(file);
-        if (ext) {
-            file = file.replace(new RegExp('\\' + ext + '$'), '');
-        }
-        // and use require.extensions to resolve known file types eg. CoffeeScript
+        // remove the file extension and use require.resolve to resolve known
+        // file types eg. CoffeeScript. Will throw if not found/loadable by node.
+        file = ext ? file.slice(0, -ext.length) : file;
         require.resolve(file);
         return true;
     } catch (err) {
@@ -43,29 +55,42 @@ function tryResolve(file) {
 }
 
 
-function scan(file, controllers) {
+/**
+ * Recursively (synchronously) scans the provided root directory, locating files which
+ * are able to be loaded by node.
+ * @param dir the root dir to begin scanning
+ * @param controllers an array containing the absolute file paths of all found controllers
+ * @returns {Array} the controllers array.
+ */
+function scan(dir, controllers) {
     var stats;
 
     controllers = controllers || [];
-    if (typeof file !== 'string') {
-        return controllers;
+
+    stats = fs.statSync(dir);
+
+    if (stats.isDirectory())  {
+        // recursively scan child files
+        fs.readdirSync(dir).forEach(function (child) {
+            scan(path.join(dir, child), controllers);
+        });
     }
 
-    assert.ok(fs.existsSync(file), 'Route directory not found. (\'' + file + '\')');
-
-    stats = fs.statSync(file);
-    if (stats.isDirectory())  {
-        fs.readdirSync(file).forEach(function (child) {
-            scan(path.join(file, child), controllers);
-        });
-    } else if (stats.isFile() && tryResolve(file)) {
-        controllers.push(file);
+    if (stats.isFile()) {
+        // add if valid
+        isFileModule(dir) && controllers.push(dir);
     }
 
     return controllers;
 }
 
 
+/**
+ * Helper for resolving a relative file path or array
+ * of path segments.
+ * @param file file path or array of path segments.
+ * @returns {String} the resolved file path
+ */
 function resolve(file) {
     if (!file) {
         return undefined;
@@ -79,38 +104,38 @@ function resolve(file) {
     return file;
 }
 
-function isExpress(app) {
-    return app.handle && app.set;
-}
 
-module.exports = function (app) {
-    var settings;
+module.exports = function (settings) {
+    var app;
 
-    function scan(app, settings) {
+    function initialize(app, settings) {
+        // If index specified, use it.
         if (settings.index) {
             require(resolve(settings.index))(app);
-            return;
         }
 
-        // Directory to scan for routes
-        loaddir(settings.directory).forEach(function (file) {
-            var controller = require(file);
-            if (typeof controller === 'function' && controller.length === 1) {
-                controller(app);
-            }
-        });
+        // If directory specified, scan
+        if (settings.directory) {
+            loaddir(settings.directory).forEach(function (file) {
+                var controller = require(file);
+                if (typeof controller === 'function' && controller.length === 1) {
+                    controller(app);
+                }
+            });
+        }
 
-        (settings.routes || []).forEach(function (def) {
-            assert.ok(def.path, 'path is required');
-            assert.ok(typeof def.handler === 'function', 'handler is required');
+        // Finally, try specified routes
+        if (Array.isArray(settings.routes)) {
+            settings.routes.forEach(function (def) {
+                var method;
 
-            var method = (def.method || 'get').toLowerCase();
-            app[method](def.path, def.handler);
-        });
-    }
+                assert.ok(def.path, 'path is required');
+                assert.ok(typeof def.handler === 'function', 'handler is required');
 
-    function legacy(app) {
-        return scan.bind(null, app);
+                method = (def.method || 'get').toLowerCase();
+                app[method](def.path, def.handler);
+            });
+        }
     }
 
     function mount(settings) {
@@ -118,7 +143,8 @@ module.exports = function (app) {
             // Remove sacrificial express app
             parent.stack.pop();
 
-            scan(parent, settings);
+            // Process the configuration.
+            initialize(parent, settings);
 
             // Reorganize stack to place router in correct place
             // This could get out of whack if someone registers
@@ -142,12 +168,6 @@ module.exports = function (app) {
         };
     }
 
-    if (isExpress(app)) {
-        console.warn('This API has been deprecated and will be removed in future versions. Use `app.use(enrouten(options))`.');
-        return { withRoutes: legacy(app) };
-    }
-
-    settings = app;
     app = express();
     app.once('mount', mount(settings));
     return app;

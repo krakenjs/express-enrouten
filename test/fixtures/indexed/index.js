@@ -3,9 +3,9 @@
 var controller = require('./controller'),
     subcontroller = require('./subsuperfluous/subcontroller');
 
-module.exports = function (app) {
+module.exports = function (router) {
 
-    app.get('/good', controller);
-    app.get('/subgood', subcontroller);
+    router.get('/good', controller);
+    router.get('/subgood', subcontroller);
 
 };

@@ -1,11 +1,11 @@
 /*global describe:false, it:false, before:false, after:false*/
 'use strict';
 
-var path = require('path'),
-    assert = require('chai').assert,
-    express = require('express'),
-    request = require('supertest'),
-    enrouten = require('../index');
+var path = require('path');
+var assert = require('chai').assert;
+var express = require('express');
+var request = require('supertest');
+var enrouten = require('../index');
 
 
 describe('express-enrouten', function () {
@@ -128,47 +128,8 @@ describe('express-enrouten', function () {
                         directory: path.join('.', 'fixtures', 'flat')
                     });
 
-                    // Removes enrouten, but adds `router`, so 3
-                    assert.equal(app.stack.length, 3);
+                    assert.equal(app._router.stack.length, 3);
                     next();
-                });
-
-
-                it('should reorder router to where/when enrouten is invoked', function (next) {
-                    var app;
-
-                    app = express();
-                    app.get(route, noop);
-                    app.use(express.static('./public'));
-
-                    fn(app, {
-                        directory: path.join('.', 'fixtures', 'flat')
-                    });
-
-                    assert.equal(app.stack.length, 4);
-                    assert.equal(app.stack[3].handle.name, 'router');
-                    next();
-                });
-
-
-                it('should do reordering after scanning to allow scanned files to register middleware', function (next) {
-                    var app;
-
-                    app = express();
-                    app.get(route, noop);
-                    app.use(express.static('./public'));
-
-                    fn(app, {
-                        directory: path.join('.', 'fixtures', 'middleware')
-                    });
-
-                    assert.equal(app.stack.length, 5);
-                    assert.equal(app.stack[4].handle.name, 'router');
-
-                    get(app, route + 'foo', function (err) {
-                        assert.ok(!err);
-                        next();
-                    });
                 });
 
             });
@@ -356,35 +317,30 @@ describe('express-enrouten', function () {
                 });
 
 
-                it('should only load the automatic explicit index file', function () {
-                    var initialized, shim;
+                it('should only load the automatic explicit index file', function (next) {
+                    var initialized, app;
 
                     initialized = [];
-                    shim = express();
-                    shim.get = function (path) {
-                        initialized.push(path);
-                    };
+                    app = express();
 
-                    fn(shim, {
+                    fn(app, {
                         index: path.join('.', 'fixtures', 'indexed', 'index')
                     });
 
-                    assert.strictEqual(initialized.length, 2);
-                    assert.strictEqual(initialized[0], '/good');
-                    assert.strictEqual(initialized[1], '/subgood');
+                    get(app, route + 'good', function (err) {
+                        assert.ok(!err);
+                        get(app, route + 'subgood', next);
+                    });
                 });
 
 
                 it('should not load missing index file', function () {
-                    var error, shim;
+                    var error, app;
 
-                    shim = express();
-                    shim.get = function (path) {
-                        // ...
-                    };
+                    app = express();
 
                     try {
-                        fn(shim, {
+                        fn(app, {
                             index: path.join('.', 'fixtures', 'indexed', 'indx')
                         });
                     } catch (err) {
@@ -400,11 +356,11 @@ describe('express-enrouten', function () {
     }
 
 
-    test('new api', function refactor(app, settings) {
+    test('plain', function plain(app, settings) {
         app.use(enrouten(settings));
     });
 
-    test('new api with route', function refactor(app, settings) {
+    test('route', function route(app, settings) {
         app.use('/foo', enrouten(settings));
     }, '/foo/');
 

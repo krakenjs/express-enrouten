@@ -3,6 +3,9 @@ express-enrouten
 
 Route configuration middleware for expressjs.
 
+Note: `express-enrouten >=1.0` is only compatible with `express >=4.0`.
+For `express 3.x` support, please use `express-enrouten 0.3.x`.
+
 
 [![Build Status](https://travis-ci.org/paypal/express-enrouten.png)](https://travis-ci.org/paypal/express-enrouten)
 [![NPM version](https://badge.fury.io/js/express-enrouten.png)](http://badge.fury.io/js/express-enrouten)
@@ -60,10 +63,10 @@ the file to load which acts as the route 'index' of the application.
 
 ```javascript
 // index.js
-module.exports = function (app) {
+module.exports = function (router) {
 
-    app.get('/', index);
-    app.get('/account', passport.protect, account);
+    router.get('/', index);
+    router.get('/account', passport.protect, account);
 
     // etc...
 };
@@ -75,15 +78,15 @@ A 'controller' is defined as any `require`-able file which exports a function th
 ```javascript
 // Good :)
 // controllers/controller.js
-module.exports = function (app) {
-    app.get('/', function (req, res) {
+module.exports = function (router) {
+    router.get('/', function (req, res) {
         // ...
     });
 };
 
 // Bad :(
 // Function does not get returned when `require`-ed, use `module.exports`
-exports = function (app) {
+exports = function (router) {
     // ...
 };
 

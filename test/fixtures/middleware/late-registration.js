@@ -1,14 +1,14 @@
 'use strict';
 
 
-module.exports = function (app) {
+module.exports = function (router) {
 
-    app.use('/foo', function (req, res, next) {
+    router.use('/foo', function (req, res, next) {
         req.foo = true;
         next();
     });
 
-    app.get('/foo', function (req, res) {
+    router.get('/foo', function (req, res) {
         if (req.foo) {
             res.send(200, 'ok');
             return;

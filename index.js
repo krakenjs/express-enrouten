@@ -53,7 +53,7 @@ module.exports = function enrouten(options) {
 function mount(app, options) {
 
     return function onmount(parent) {
-        var router, handler;
+        var router;
 
         // Remove sacrificial express app and keep a
         // copy of the currently registered items.

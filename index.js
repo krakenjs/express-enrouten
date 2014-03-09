@@ -19,13 +19,27 @@
 
 var fs = require('fs');
 var path = require('path');
+var caller = require('caller');
 var assert = require('assert');
 var express = require('express');
+var debug = require('debuglog')('enrouten');
 
 
-module.exports = function (settings) {
-    var app = express();
-    app.once('mount', mount(app, settings));
+/**
+ * The main entry point for this module. Creates middleware
+ * to be mounted to a parent application.
+ * @param options the configuration settings for this middleware instance
+ * @returns {Function} express middleware
+ */
+module.exports = function enrouten(options) {
+    var app;
+
+    options = options || {};
+    options.basedir = options.basedir || path.dirname(caller());
+
+    app = express();
+    app.once('mount', mount(app, options));
+
     return app;
 };
 
@@ -33,10 +47,11 @@ module.exports = function (settings) {
 /**
  * Creates the onmount handler used to process teh middelwarez
  * @param app the sacrificial express app to use.
- * @param settings the configuration settings to use when scanning
+ * @param options the configuration settings to use when scanning
  * @returns {Function}
  */
-function mount(app, settings) {
+function mount(app, options) {
+
     return function onmount(parent) {
         var router;
 
@@ -46,34 +61,115 @@ function mount(app, settings) {
         parent._router.stack.pop();
 
         // Process the configuration, adding to the stack
-        router = initialize(settings, new express.Router());
+        router = new express.Router();
+
+        if (typeof options.index === 'string') {
+            options.index = resolve(options.basedir, options.index);
+            index(router, options.index);
+        }
+
+        if (typeof options.directory === 'string') {
+            options.directory = resolve(options.basedir, options.directory);
+            directory(options.directory, '', '', createFileHandler(router));
+        }
+
+        if (typeof options.routes === 'object') {
+            routes(router, options.routes);
+        }
+
+        debug('mouting routes at', app.mountpath);
         parent.use(app.mountpath, router);
+    };
+
+}
+
+
+/**
+ * The `index` configuration option handler
+ * @param router the router against which routes shuld be registered
+ * @param file the file to load
+ * @returns the provided router instance
+ */
+function index(router, file) {
+    var module;
+
+    module = require(file);
+    assert.equal(typeof module, 'function', 'An index file must export a function.');
+    assert.equal(module.length, 1, 'An index file must export a function that accepts a single argument.');
+
+    debug('loading index file', file);
+    module(router);
+
+    return router;
+}
+
+
+/**
+ * The `directory` configuration option handler. Recursively
+ * traverses the provided basedir, invoking the provided
+ * function when a file is encountered
+ * @param basedir the root directory where the traversal should begin
+ * @param ancesors the relative path from the basedir to the current dir
+ * @param current the current directory name
+ * @param fn the function to invoke when a file is encountered: `function (basedir, ancestors, current)`
+ */
+function directory(basedir, ancestors, current, fn) {
+    var abs, stat;
+
+    abs = path.join(basedir, ancestors, current);
+    stat = fs.statSync(abs);
+
+    if (stat.isDirectory()) {
+        ancestors = ancestors ? path.join(ancestors, current) : current;
+        fs.readdirSync(abs).forEach(function (child) {
+            directory(basedir, ancestors, child, fn);
+        });
+    }
+
+    if (stat.isFile()) {
+        fn(basedir, ancestors, current);
+    }
+}
+
+
+/**
+ * Factory function that produces a fn implementation to
+ * provide to the directory handler. Filters file/module
+ * for the desired API `function(router)`, determines mount
+ * point and mounts the router.
+ * @param router the express Router against which child routers are mounted
+ * @returns {Function} the implementation function to provide to directory
+ */
+function createFileHandler(router) {
+    return function handler(basedir, ancestors, current) {
+        var abs, impl, mountPoint, child;
+
+        abs = path.join(basedir, ancestors, current);
+
+        if (isFileModule(abs)) {
+            impl = require(abs);
+
+            if (typeof impl === 'function' && impl.length === 1) {
+                mountPoint = ancestors ? ancestors.split(path.sep) : [];
+                mountPoint.push(path.basename(current, path.extname(current)));
+                mountPoint = '/' + mountPoint.join('/');
+
+                debug('mounting', current, 'at', mountPoint);
+                child = new express.Router();
+                impl(child);
+                router.use(mountPoint, child);
+            }
+        }
     };
 }
 
 
-/*
- *
+/**
+ * The `routes` configuration option handler.
  */
-function initialize(settings, router) {
-    // If index specified, use it.
-    if (settings.index) {
-        require(resolve(settings.index))(router);
-    }
-
-    // If directory specified, scan
-    if (settings.directory) {
-        loaddir(settings.directory).forEach(function (file) {
-            var controller = require(file);
-            if (typeof controller === 'function' && controller.length === 1) {
-                controller(router);
-            }
-        });
-    }
-
-    // Finally, try specified routes
-    if (Array.isArray(settings.routes)) {
-        settings.routes.forEach(function (def) {
+function routes(router, options) {
+    if (Array.isArray(options)) {
+        options.forEach(function (def) {
             var method;
 
             assert.ok(def.path, 'path is required');
@@ -83,67 +179,7 @@ function initialize(settings, router) {
             router[method](def.path, def.handler);
         });
     }
-
     return router;
-}
-
-
-/**
- * Helper for resolving a relative file path or array
- * of path segments.
- * @param file file path or array of path segments.
- * @returns {String} the resolved file path
- */
-function resolve(file) {
-    if (!file) {
-        return undefined;
-    }
-
-    if (Array.isArray(file)) {
-        file = path.join.apply(undefined, file);
-    }
-
-    file = path.resolve(file);
-    return file;
-}
-
-
-/**
- * Resolve and recursively scan the provided directory
- * @param dir the directory to scan.
- * @returns {Array} absolute file paths that are able to be loaded by Node code.
- */
-function loaddir(dir) {
-    return scan(resolve(dir));
-}
-
-
-/**
- * Recursively (synchronously) scans the provided root directory, locating files which
- * are able to be loaded by node.
- * @param dir the root dir to begin scanning
- * @param controllers an array containing the absolute file paths of all found controllers
- * @returns {Array} the controllers array.
- */
-function scan(dir, controllers) {
-    var stats;
-
-    controllers = controllers || [];
-
-    stats = fs.statSync(dir);
-    if (stats.isDirectory())  {
-        // recursively scan child files
-        fs.readdirSync(dir).forEach(function (child) {
-            scan(path.join(dir, child), controllers);
-        });
-    }
-
-    if (stats.isFile()) {
-        // add if valid
-        isFileModule(dir) && controllers.push(dir);
-    }
-
-    return controllers;
 }
 
 
@@ -166,4 +202,20 @@ function isFileModule(file) {
     } catch (err) {
         return false;
     }
+}
+
+
+/**
+ * Resolves the provide basedir and file, returning
+ * and absolute file path.
+ * @param basedir the base directory to use in path resolution
+ * @param file the absolute or relative file path to resolve.
+ * @returns {String} the resolved absolute file path.
+ */
+function resolve(basedir, file) {
+    if (path.resolve(file) === file) {
+        // absolute path
+        return file;
+    }
+    return path.join(basedir, file);
 }

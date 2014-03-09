@@ -37,13 +37,34 @@ app.use(enrouten({
 });
 ```
 
-- `directory` (optional) - String or array of path segments. Specify a directory to have enrouten scan all files recursively
-to find files that match the controller-spec API.
+- `directory` (optional) - String or array of path segments. Specify a directory to
+have enrouten scan all files recursively to find files that match the controller-spec
+API. With this API, the directory structure dictates the paths at which handlers
+will be mounted.
 
+```text
+controllers
+ |-user
+     |-create.js
+     |-list.js
+```
+```javascript
+// create.js
+module.exports = function (router) {
+    router.post('/', function (req, res) {
+        res.send('ok');
+    });
+};
+```
 ```javascript
 app.use(enrouten({
     directory: 'controllers'
 });
+```
+Routes are now:
+```test
+/user/create
+/user/list
 ```
 
 - `routes` (optional) An array of route definition objects. Each definition must have a `path` and `handler` property and

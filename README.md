@@ -112,7 +112,12 @@ module.exports = function (router) {
 
 
 ### Controller Files
-A 'controller' is defined as any `require`-able file which exports a function that accepts a single argument. Any files with an extension of `.js` (or `.coffee` if CoffeeScript is registered) will be loaded and if it exports a function that accepts a single argument then this function will be called. **NOTE: Any file in the directory tree that matches the API will be invoked/initialized with the express application object.**
+A 'controller' is defined as any `require`-able file which exports a function
+that accepts a single argument. Any files with an extension of `.js` (or `.coffee`
+if CoffeeScript is registered) will be loaded and if it exports a function that
+accepts a single argument then this function will be called. **NOTE: Any file in
+the directory tree that matches the API will be invoked/initialized with the
+express router object.**
 
 ```javascript
 // Good :)

@@ -17,12 +17,14 @@
 \*───────────────────────────────────────────────────────────────────────────*/
 'use strict';
 
-var fs = require('fs');
 var path = require('path');
 var caller = require('caller');
-var assert = require('assert');
 var express = require('express');
 var debug = require('debuglog')('enrouten');
+var index = require('./lib/index');
+var routes = require('./lib/routes');
+var registry = require('./lib/registry');
+var directory = require('./lib/directory');
 
 
 /**
@@ -53,16 +55,15 @@ module.exports = function enrouten(options) {
 function mount(app, options) {
 
     return function onmount(parent) {
-        var router;
+        var locals, router;
 
         // Remove sacrificial express app and keep a
         // copy of the currently registered items.
         /// XXX: caveat emptor, private member
         parent._router.stack.pop();
+        router = registry(app.mountpath);
 
         // Process the configuration, adding to the stack
-        router = new express.Router();
-
         if (typeof options.index === 'string') {
             options.index = resolve(options.basedir, options.index);
             index(router, options.index);
@@ -70,139 +71,19 @@ function mount(app, options) {
 
         if (typeof options.directory === 'string') {
             options.directory = resolve(options.basedir, options.directory);
-            directory(options.directory, '', '', createFileHandler(router));
+            directory(router, options.directory);
         }
 
         if (typeof options.routes === 'object') {
             routes(router, options.routes);
         }
 
-        debug('mouting routes at', app.mountpath);
-        parent.use(app.mountpath, router);
+        parent.locals.routes = router.routes;
+        debug('mounting routes at', app.mountpath);
+        debug(router.routes);
+        parent.use(app.mountpath, router._router);
     };
 
-}
-
-
-/**
- * The `index` configuration option handler
- * @param router the router against which routes shuld be registered
- * @param file the file to load
- * @returns the provided router instance
- */
-function index(router, file) {
-    var module;
-
-    module = require(file);
-    assert.equal(typeof module, 'function', 'An index file must export a function.');
-    assert.equal(module.length, 1, 'An index file must export a function that accepts a single argument.');
-
-    debug('loading index file', file);
-    module(router);
-
-    return router;
-}
-
-
-/**
- * The `directory` configuration option handler. Recursively
- * traverses the provided basedir, invoking the provided
- * function when a file is encountered
- * @param basedir the root directory where the traversal should begin
- * @param ancesors the relative path from the basedir to the current dir
- * @param current the current directory name
- * @param fn the function to invoke when a file is encountered: `function (basedir, ancestors, current)`
- */
-function directory(basedir, ancestors, current, fn) {
-    var abs, stat;
-
-    abs = path.join(basedir, ancestors, current);
-    stat = fs.statSync(abs);
-
-    if (stat.isDirectory()) {
-        ancestors = ancestors ? path.join(ancestors, current) : current;
-        fs.readdirSync(abs).forEach(function (child) {
-            directory(basedir, ancestors, child, fn);
-        });
-    }
-
-    if (stat.isFile()) {
-        fn(basedir, ancestors, current);
-    }
-}
-
-
-/**
- * Factory function that produces a fn implementation to
- * provide to the directory handler. Filters file/module
- * for the desired API `function(router)`, determines mount
- * point and mounts the router.
- * @param router the express Router against which child routers are mounted
- * @returns {Function} the implementation function to provide to directory
- */
-function createFileHandler(router) {
-    return function handler(basedir, ancestors, current) {
-        var abs, impl, filename, mountPoint, child;
-
-        abs = path.join(basedir, ancestors, current);
-        filename = path.basename(current, path.extname(current));
-
-        if (isFileModule(abs)) {
-            impl = require(abs);
-
-            if (typeof impl === 'function' && impl.length === 1) {
-                mountPoint = ancestors ? ancestors.split(path.sep) : [];
-                filename !== 'index' && mountPoint.push(filename);
-                mountPoint = '/' + mountPoint.join('/');
-
-                debug('mounting', current, 'at', mountPoint);
-                child = new express.Router();
-                impl(child);
-                router.use(mountPoint, child);
-            }
-        }
-    };
-}
-
-
-/**
- * The `routes` configuration option handler.
- */
-function routes(router, options) {
-    if (Array.isArray(options)) {
-        options.forEach(function (def) {
-            var method;
-
-            assert.ok(def.path, 'path is required');
-            assert.ok(typeof def.handler === 'function', 'handler is required');
-
-            method = (def.method || 'get').toLowerCase();
-            router[method](def.path, def.handler);
-        });
-    }
-    return router;
-}
-
-
-/**
- * Returns true if `require` is able to load the provided file
- * or false if not.
- * http://nodejs.org/api/modules.html#modules_file_modules
- * @param file the file for which to determine module-ness.
- * @returns {boolean}
- */
-function isFileModule(file) {
-    var ext = path.extname(file);
-
-    try {
-        // remove the file extension and use require.resolve to resolve known
-        // file types eg. CoffeeScript. Will throw if not found/loadable by node.
-        file = ext ? file.slice(0, -ext.length) : file;
-        require.resolve(file);
-        return true;
-    } catch (err) {
-        return false;
-    }
 }
 
 

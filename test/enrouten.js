@@ -116,11 +116,14 @@ function run(test, name, mount, fn) {
 
             fn(app, settings);
 
-            get(app, mount + '/good', function (err) {
+            get(app, mount + '/', function (err) {
                 t.error(err);
-                get(app, mount + '/subgood', function (err) {
+                get(app, mount + '/good', function (err) {
                     t.error(err);
-                    t.end();
+                    get(app, mount + '/subgood', function (err) {
+                        t.error(err);
+                        t.end();
+                    });
                 });
             });
         });
@@ -159,6 +162,50 @@ function run(test, name, mount, fn) {
                     t.end();
                 });
             });
+        });
+
+
+        t.test('named', function (t) {
+            var app, settings
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'named', 'routes')
+            };
+
+            fn(app, settings);
+
+            t.ok(typeof app.locals.routes, 'object');
+            t.equal(app.locals.routes['my-foo'], mount ? mount : '/');
+            t.equal(app.locals.routes['my-bar'], mount + '/bar');
+            t.equal(app.locals.routes['my-list'], mount + '/list/stuff');
+
+            get(app, mount + '/', function (err) {
+                t.error(err);
+                get(app, mount + '/list', function (err) {
+                    t.error(err);
+                    get(app, mount + '/list/stuff', function (err) {
+                        t.error(err);
+                        t.end();
+                    });
+                });
+            });
+        });
+
+
+        t.test('duplicate names', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'named', 'duplicates')
+            };
+
+            t.throws(function () {
+                fn(app, settings);
+            });
+
+            t.end();
         });
 
     });
@@ -218,6 +265,47 @@ function run(test, name, mount, fn) {
             t.throws(function () {
                 fn(app, settings);
             });
+            t.end();
+        });
+
+
+        t.test('named', function (t) {
+            var app, settings
+
+            app = express();
+            settings = {
+                index: path.join('fixtures', 'named', 'routes')
+            };
+
+            fn(app, settings);
+
+            t.ok(typeof app.locals.routes, 'object');
+            t.equal(app.locals.routes['my-foo'], mount ? mount : '/');
+            t.equal(app.locals.routes['my-bar'], mount + '/bar');
+            // t.equal(app.locals.routes['my-list'], mount + '/list');
+
+            get(app, mount + '/', function (err) {
+                t.error(err);
+                get(app, mount + '/bar', function (err) {
+                    t.error(err);
+                    t.end();
+                });
+            });
+        });
+
+
+        t.test('duplicate names', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                index: path.join('fixtures', 'named', 'duplicates')
+            };
+
+            t.throws(function () {
+                fn(app, settings);
+            });
+
             t.end();
         });
 

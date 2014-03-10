@@ -5,6 +5,7 @@ var controller = require('./controller'),
 
 module.exports = function (router) {
 
+    router.get('/', controller);
     router.get('/good', controller);
     router.get('/subgood', subcontroller);
 

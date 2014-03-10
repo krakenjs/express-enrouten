@@ -67,11 +67,14 @@ function mount(app, options) {
         if (typeof options.index === 'string') {
             options.index = resolve(options.basedir, options.index);
             index(router, options.index);
-        }
+        } else {
 
-        if (typeof options.directory === 'string') {
-            options.directory = resolve(options.basedir, options.directory);
-            directory(router, options.directory);
+            // `index` option overrides directory scanning
+            if (typeof options.directory === 'string') {
+                options.directory = resolve(options.basedir, options.directory);
+                directory(router, options.directory);
+            }
+
         }
 
         if (typeof options.routes === 'object') {

@@ -142,16 +142,17 @@ function directory(basedir, ancestors, current, fn) {
  */
 function createFileHandler(router) {
     return function handler(basedir, ancestors, current) {
-        var abs, impl, mountPoint, child;
+        var abs, impl, filename, mountPoint, child;
 
         abs = path.join(basedir, ancestors, current);
+        filename = path.basename(current, path.extname(current));
 
         if (isFileModule(abs)) {
             impl = require(abs);
 
             if (typeof impl === 'function' && impl.length === 1) {
                 mountPoint = ancestors ? ancestors.split(path.sep) : [];
-                mountPoint.push(path.basename(current, path.extname(current)));
+                filename !== 'index' && mountPoint.push(filename);
                 mountPoint = '/' + mountPoint.join('/');
 
                 debug('mounting', current, 'at', mountPoint);

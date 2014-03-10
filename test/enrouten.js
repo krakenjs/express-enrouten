@@ -89,7 +89,6 @@ function run(test, name, mount, fn) {
         t.test('nested', function (t) {
             var app, settings;
 
-
             app = express();
             settings = {
                 directory: path.join('fixtures', 'nested')
@@ -100,6 +99,26 @@ function run(test, name, mount, fn) {
             get(app, mount + '/controller', function (err) {
                 t.error(err);
                 get(app, mount + '/subdirectory/subcontroller', function (err) {
+                    t.error(err);
+                    t.end();
+                });
+            });
+        });
+
+
+        t.test('index', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'indexed')
+            };
+
+            fn(app, settings);
+
+            get(app, mount + '/good', function (err) {
+                t.error(err);
+                get(app, mount + '/subgood', function (err) {
                     t.error(err);
                     t.end();
                 });

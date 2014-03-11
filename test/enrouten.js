@@ -176,9 +176,9 @@ function run(test, name, mount, fn) {
             fn(app, settings);
 
             t.ok(typeof app.locals.routes, 'object');
-            t.equal(app.locals.routes['my-foo'], mount ? mount : '/');
-            t.equal(app.locals.routes['my-bar'], mount + '/bar');
-            t.equal(app.locals.routes['my-list'], mount + '/list/stuff');
+            t.equal(app.locals.enrouten.routes['my-foo'], mount ? mount : '/');
+            t.equal(app.locals.enrouten.routes['my-bar'], mount + '/bar');
+            t.equal(app.locals.enrouten.routes['my-list'], mount + '/list/stuff');
 
             get(app, mount + '/', function (err) {
                 t.error(err);
@@ -280,8 +280,8 @@ function run(test, name, mount, fn) {
             fn(app, settings);
 
             t.ok(typeof app.locals.routes, 'object');
-            t.equal(app.locals.routes['my-foo'], mount ? mount : '/');
-            t.equal(app.locals.routes['my-bar'], mount + '/bar');
+            t.equal(app.locals.enrouten.routes['my-foo'], mount ? mount : '/');
+            t.equal(app.locals.enrouten.routes['my-bar'], mount + '/bar');
             // t.equal(app.locals.routes['my-list'], mount + '/list');
 
             get(app, mount + '/', function (err) {

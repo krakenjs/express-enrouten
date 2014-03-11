@@ -20,30 +20,12 @@
 var path = require('path');
 var caller = require('caller');
 var express = require('express');
+var reverend = require('reverend');
 var debug = require('debuglog')('enrouten');
 var index = require('./lib/index');
 var routes = require('./lib/routes');
 var registry = require('./lib/registry');
 var directory = require('./lib/directory');
-
-
-/**
- * The main entry point for this module. Creates middleware
- * to be mounted to a parent application.
- * @param options the configuration settings for this middleware instance
- * @returns {Function} express middleware
- */
-module.exports = function enrouten(options) {
-    var app;
-
-    options = options || {};
-    options.basedir = options.basedir || path.dirname(caller());
-
-    app = express();
-    app.once('mount', mount(app, options));
-
-    return app;
-};
 
 
 /**
@@ -81,7 +63,10 @@ function mount(app, options) {
             routes(router, options.routes);
         }
 
-        parent.locals.routes = router.routes;
+        parent.locals.enrouten = {
+            routes: router.routes
+        };
+        
         debug('mounting routes at', app.mountpath);
         debug(router.routes);
         parent.use(app.mountpath, router._router);
@@ -104,3 +89,32 @@ function resolve(basedir, file) {
     }
     return path.join(basedir, file);
 }
+
+
+/**
+ * The main entry point for this module. Creates middleware
+ * to be mounted to a parent application.
+ * @param options the configuration settings for this middleware instance
+ * @returns {Function} express middleware
+ */
+function enrouten(options) {
+    var app;
+
+    options = options || {};
+    options.basedir = options.basedir || path.dirname(caller());
+
+    app = express();
+    app.once('mount', mount(app, options));
+
+    return app;
+};
+
+
+
+enrouten.getPath = function (req, name, data) {
+    var path = req.app.locals.routes[name];
+    return reverend(path, data);
+};
+
+
+module.exports = enrouten;

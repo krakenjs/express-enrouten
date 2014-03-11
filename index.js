@@ -20,7 +20,6 @@
 var path = require('path');
 var caller = require('caller');
 var express = require('express');
-var reverend = require('reverend');
 var debug = require('debuglog')('enrouten');
 var index = require('./lib/index');
 var routes = require('./lib/routes');
@@ -66,7 +65,7 @@ function mount(app, options) {
         parent.locals.enrouten = {
             routes: router.routes
         };
-        
+
         debug('mounting routes at', app.mountpath);
         debug(router.routes);
         parent.use(app.mountpath, router._router);
@@ -107,13 +106,6 @@ function enrouten(options) {
     app.once('mount', mount(app, options));
 
     return app;
-};
-
-
-
-enrouten.getPath = function (req, name, data) {
-    var path = req.app.locals.routes[name];
-    return reverend(path, data);
 };
 
 

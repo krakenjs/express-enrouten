@@ -95,7 +95,7 @@ app.use(enrouten({
 ### Named Routes
 For `index` and `directory` configurations there is also support for named routes.
 The normal express router that is passed in will always behave as such, but in addition
-it can be used to name a route, adding the name and path to `app.locals.routes`.
+it can be used to name a route, adding the name and path to `app.locals.enrouten.routes`.
 For example:
 ```javascript
 'use strict';

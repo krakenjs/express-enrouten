@@ -25,22 +25,14 @@ app.use(enrouten({ ... }));
 ### Configuration
 express-enrouten supports routes via configuration and convention.
 ```javascript
-app.use(enrouten({
-        routes: [{
-            method: 'GET',
-            path: '/foo',
-            handler: function (req, res) {
-                // ...
-            }
-        }]
-    }
-});
+app.use(enrouten({ directory: 'routes' }));
 ```
 
-- `directory` (optional) - String or array of path segments. Specify a directory to
-have enrouten scan all files recursively to find files that match the controller-spec
-API. With this API, the directory structure dictates the paths at which handlers
-will be mounted.
+#### directory
+The `directory` configuration option (optional) is the path to a directory.
+Specify a directory to have enrouten scan all files recursively to find files
+that match the controller-spec API. With this API, the directory structure
+dictates the paths at which handlers will be mounted.
 
 ```text
 controllers
@@ -59,7 +51,7 @@ module.exports = function (router) {
 ```javascript
 app.use(enrouten({
     directory: 'controllers'
-});
+}));
 ```
 Routes are now:
 ```test
@@ -67,8 +59,29 @@ Routes are now:
 /user/list
 ```
 
-- `routes` (optional) An array of route definition objects. Each definition must have a `path` and `handler` property and
-can have an optional `method` property (`method` defaults to 'GET').
+#### index
+The `index` configuration option (optional, overrides `directory` and disables scanning)
+is the path to the single file to load (which acts as the route 'index' of the application.)
+```javascript
+app.use(enrouten({
+    index: 'routes/'
+}));
+```
+```javascript
+// index.js
+module.exports = function (router) {
+
+    router.get('/', index);
+    router.all(passport.protect).get('/account', account);
+
+    // etc...
+};
+```
+
+#### routes
+The `routes` configuration option (optional) is an array of route definition objects.
+Each definition must have a `path` and `handler` property and can have an optional
+`method` property (`method` defaults to 'GET').
 
 ```javascript
 app.use(enrouten({
@@ -76,25 +89,35 @@ app.use(enrouten({
         { path: '/',    method: 'GET', handler: require('./controllers/index') },
         { path: '/foo', method: 'GET', handler: require('./controllers/foo') }
     ]
-});
+}));
 ```
 
-- `index` (optional, overrides `directory` and disables scanning) - String path or array of path segments indicating
-the file to load which acts as the route 'index' of the application.
-
+### Named Routes
+For `index` and `directory` configurations there is also support for named routes.
+The normal express router that is passed in will always behave as such, but in addition
+it can be used to name a route, adding the name and path to `app.locals.enrouten.routes`.
+For example:
 ```javascript
-// index.js
+'use strict';
+
 module.exports = function (router) {
 
-    router.get('/', index);
-    router.get('/account', passport.protect, account);
+    router({ path: '/user/:id', name: 'user-info' })
+        .get(function (req, res) {
+            res.send('ok');
+        });
 
-    // etc...
 };
 ```
 
+
 ### Controller Files
-A 'controller' is defined as any `require`-able file which exports a function that accepts a single argument. Any files with an extension of `.js` (or `.coffee` if CoffeeScript is registered) will be loaded and if it exports a function that accepts a single argument then this function will be called. **NOTE: Any file in the directory tree that matches the API will be invoked/initialized with the express application object.**
+A 'controller' is defined as any `require`-able file which exports a function
+that accepts a single argument. Any files with an extension of `.js` (or `.coffee`
+if CoffeeScript is registered) will be loaded and if it exports a function that
+accepts a single argument then this function will be called. **NOTE: Any file in
+the directory tree that matches the API will be invoked/initialized with the
+express router object.**
 
 ```javascript
 // Good :)
@@ -114,7 +137,7 @@ exports = function (router) {
 // Bad :(
 // controllers/other-file-in-same-controller-directory.js
 modules.exports = function (config) {
-    // `config` will be the express application
+    // `config` will be an express Router
     // ...
 };
 

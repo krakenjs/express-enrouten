@@ -6,7 +6,7 @@
   "scripts": {
     "test": "tape test/*.js",
     "cover": "istanbul cover tape -- test/*.js",
-    "lint": "jshint -c .jshintrc index.js"
+    "lint": "jshint -c .jshintrc index.js lib/*.js"
   },
   "repository": "git://github.com/paypal/express-enrouten.git",
   "publishConfig": {

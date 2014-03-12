@@ -14,4 +14,9 @@ module.exports = function (router) {
             res.send('ok');
         });
 
+    router({ path: '/bar/:id', name: 'the-bar' })
+        .get(function (req, res) {
+            res.send('ok');
+        });
+
 };

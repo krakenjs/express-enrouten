@@ -20,6 +20,7 @@
 var path = require('path');
 var caller = require('caller');
 var express = require('express');
+var reverend = require('reverend');
 var debug = require('debuglog')('enrouten');
 var index = require('./lib/index');
 var routes = require('./lib/routes');
@@ -48,22 +49,31 @@ function mount(app, options) {
         if (typeof options.index === 'string') {
             options.index = resolve(options.basedir, options.index);
             index(router, options.index);
-        } else {
+        }
 
-            // `index` option overrides directory scanning
-            if (typeof options.directory === 'string') {
-                options.directory = resolve(options.basedir, options.directory);
-                directory(router, options.directory);
-            }
-
+        if (typeof options.directory === 'string') {
+            options.directory = resolve(options.basedir, options.directory);
+            directory(router, options.directory);
         }
 
         if (typeof options.routes === 'object') {
             routes(router, options.routes);
         }
 
+        // Setup app locals for use in handlers.
         parent.locals.enrouten = {
-            routes: router.routes
+
+            routes: router.routes,
+
+            path: function path(name, data) {
+                var route;
+                route = this.routes[name];
+                if (typeof route === 'string') {
+                    return reverend(route, data || {});
+                }
+                return undefined;
+            }
+
         };
 
         debug('mounting routes at', app.mountpath);
@@ -106,6 +116,22 @@ function enrouten(options) {
     app.once('mount', mount(app, options));
 
     return app;
+}
+
+
+/**
+ * Create a URL from a named route and data.
+ * @param app the express app for which to generate the named route
+ * @param name the name of the route to generate
+ * @param data the object containing keys and values for the named replacements.
+ * @returns {String} the generated URL or undefined if no named route exists.
+ */
+enrouten.path = function path(app, name, data) {
+    var locals = app.locals;
+    if (locals.enrouten && typeof locals.enrouten.path === 'function') {
+        return locals.enrouten.path(name, data);
+    }
+    return undefined;
 };
 
 

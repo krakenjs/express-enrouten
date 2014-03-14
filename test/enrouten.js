@@ -489,7 +489,7 @@ function run(test, name, mount, fn) {
             actual = app.locals.enrouten.path('my-bar');
             t.equal(actual, mount + '/bar');
 
-            actual = enrouten.path(app, 'unknown');
+            actual = app.locals.enrouten.path(app, 'unknown');
             t.equal(actual, undefined);
 
             t.end();

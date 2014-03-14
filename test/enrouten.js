@@ -443,4 +443,58 @@ function run(test, name, mount, fn) {
 
     });
 
+
+    test('path generation', function (t) {
+
+        t.test('api', function (t) {
+            var app, settings, actual;
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'named', 'routes')
+            };
+
+            // enrouten not yet run
+            actual = enrouten.path(app, 'the-bar', { id: 10 });
+            t.equal(actual, undefined);
+
+            fn(app, settings);
+
+            actual = enrouten.path(app, 'the-bar', { id: 10 });
+            t.equal(actual, mount + '/bar/10');
+
+            actual = enrouten.path(app, 'my-bar');
+            t.equal(actual, mount + '/bar');
+
+            actual = enrouten.path(app, 'unknown');
+            t.equal(actual, undefined);
+
+            t.end();
+        });
+
+
+        t.test('locals', function (t) {
+            var app, settings, actual;
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'named', 'routes')
+            };
+
+            fn(app, settings);
+
+            actual = app.locals.enrouten.path('the-bar', { id: 10 });
+            t.equal(actual, mount + '/bar/10');
+
+            actual = app.locals.enrouten.path('my-bar');
+            t.equal(actual, mount + '/bar');
+
+            actual = app.locals.enrouten.path(app, 'unknown');
+            t.equal(actual, undefined);
+
+            t.end();
+        });
+
+    });
+
 }

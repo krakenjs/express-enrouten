@@ -60,8 +60,8 @@ Routes are now:
 ```
 
 #### index
-The `index` configuration option (optional, overrides `directory` and disables scanning)
-is the path to the single file to load (which acts as the route 'index' of the application.)
+The `index` configuration option (optional) is the path to the single file to
+load (which acts as the route 'index' of the application).
 ```javascript
 app.use(enrouten({
     index: 'routes/'

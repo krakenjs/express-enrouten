@@ -34,7 +34,8 @@
     "jshint": "~2.4.4"
   },
   "dependencies": {
-    "caller": "0.0.1",
-    "debuglog": "~1.0.1"
+    "caller": "~0.0.1",
+    "debuglog": "~1.0.1",
+    "reverend": "~0.1.0"
   }
 }

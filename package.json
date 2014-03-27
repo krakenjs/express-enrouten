@@ -36,6 +36,6 @@
   "dependencies": {
     "caller": "~0.0.1",
     "debuglog": "~1.0.1",
-    "reverend": "~0.1.0"
+    "reverend": "~0.2.0"
   }
 }

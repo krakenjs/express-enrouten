@@ -8,7 +8,7 @@
     "cover": "istanbul cover tape -- test/*.js",
     "lint": "jshint -c .jshintrc index.js lib/*.js"
   },
-  "repository": "git://github.com/paypal/express-enrouten.git",
+  "repository": "git://github.com/krakenjs/express-enrouten.git",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },

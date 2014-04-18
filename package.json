@@ -1,6 +1,6 @@
 {
   "name": "express-enrouten",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "An express route initialization and configuration module.",
   "main": "index.js",
   "scripts": {

@@ -21,13 +21,10 @@ test('enrouten', function (t) {
 
 
 function get(app, route, next) {
-    var server;
-    server = request(app)
+    request(app)
         .get(route)
         .expect('Content-Type', /html/)
-        .expect(200, 'ok', function (err) {
-            server.app.close(next.bind(null, err));
-        });
+        .expect(200, 'ok', next);
 }
 
 
@@ -408,15 +405,13 @@ function run(test, name, mount, fn) {
             fn(app, settings);
 
             get(app, mount + '/sub', function (err) {
-                var server;
-
                 t.error(err);
-                server = request(app)
+                request(app)
                     .post(mount)
                     .expect('Content-Type', /html/)
                     .expect(200, 'ok', function (err) {
                         t.error(err);
-                        server.app.close(t.end.bind(t));
+                        t.end();
                     });
             });
         });

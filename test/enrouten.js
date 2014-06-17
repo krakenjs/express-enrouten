@@ -36,7 +36,7 @@ function run(test, name, mount, fn) {
         app = express();
         fn(app);
 
-        fn(app, { basedir: path.join(__dirname, 'fixtures') })
+        fn(app, { basedir: path.join(__dirname, 'fixtures') });
         fn(app, { directory: null });
         fn(app, { index: null });
         fn(app, { routes: null });

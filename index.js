@@ -61,28 +61,20 @@ function mount(app, options) {
         }
 
         // Setup app locals for use in handlers.
-        // Do this way because app.locals has no prototype. One question this raises is,
-        // should an app be able to use enrouten multiple times, and if so, should
-        // app.locals.enrouten routes be merged?
-        // https://github.com/visionmedia/express/blob/6775658ed5cbac13f2d24c89e23ed967ad6a66ba/lib/application.js#L68
-        if (!Object.prototype.hasOwnProperty.call(parent.locals, 'enrouten')) {
-            Object.defineProperty(parent.locals, 'enrouten', {
-                value: {
+        parent.locals.enrouten = {
 
-                    routes: router.routes,
+            routes: router.routes,
 
-                    path: function path(name, data) {
-                        var route;
-                        route = this.routes[name];
-                        if (typeof route === 'string') {
-                            return reverend(route, data || {});
-                        }
-                        return undefined;
-                    }
-
+            path: function path(name, data) {
+                var route;
+                route = this.routes[name];
+                if (typeof route === 'string') {
+                    return reverend(route, data || {});
                 }
-            });
-        }
+                return undefined;
+            }
+
+        };
 
         debug('mounting routes at', app.mountpath);
         debug(router.routes);

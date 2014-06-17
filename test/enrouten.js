@@ -405,10 +405,8 @@ function run(test, name, mount, fn) {
             fn(app, settings);
 
             get(app, mount + '/sub', function (err) {
-                var server;
-
                 t.error(err);
-                server = request(app)
+                request(app)
                     .post(mount)
                     .expect('Content-Type', /html/)
                     .expect(200, 'ok', function (err) {

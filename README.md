@@ -83,11 +83,15 @@ The `routes` configuration option (optional) is an array of route definition obj
 Each definition must have a `path` and `handler` property and can have an optional
 `method` property (`method` defaults to 'GET').
 
+Note that a `handler` has a different function signature than a `controller`. While a
+`controller` takes a single argument (a `router`), a `handler` takes the typical
+`req` and `res` pair.
+
 ```javascript
 app.use(enrouten({
     routes: [
-        { path: '/',    method: 'GET', handler: require('./controllers/index') },
-        { path: '/foo', method: 'GET', handler: require('./controllers/foo') }
+        { path: '/',    method: 'GET', handler: require('./routes/index') },
+        { path: '/foo', method: 'GET', handler: require('./routes/foo') }
     ]
 }));
 ```

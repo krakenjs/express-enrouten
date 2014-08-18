@@ -155,3 +155,18 @@ module.exports = {
     }
 };
 ```
+
+## Linting
+```bash
+$ npm run-script lint
+```
+
+## Tests
+```bash
+$ npm test
+```
+
+## Coverage
+```bash
+$ npm run-script cover && open coverage/lcov-report/index.html
+```

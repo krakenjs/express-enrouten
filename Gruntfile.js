@@ -26,21 +26,17 @@ module.exports = function (grunt) {
                 jshintrc: '.jshintrc'
             }
         },
-        mochaTest: {
-            src: ['test/*.js'],
-            options: {
-                globals: ['chai'],
-                timeout: 6000,
-                ignoreLeaks: false,
-                ui: 'bdd',
-                reporter: 'spec'
-            }
+        tape: {
+          options: {
+            pretty: true
+          },
+          files: ['test/*.js']
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-mocha-test');
+    grunt.loadNpmTasks('grunt-tape');
 
-    grunt.registerTask('test', ['jshint', 'mochaTest']);
+    grunt.registerTask('test', ['jshint', 'tape']);
 
 };

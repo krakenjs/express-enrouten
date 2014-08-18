@@ -163,7 +163,7 @@ function run(test, name, mount, fn) {
 
 
         t.test('named', function (t) {
-            var app, settings
+            var app, settings;
 
             app = express();
             settings = {
@@ -267,7 +267,7 @@ function run(test, name, mount, fn) {
 
 
         t.test('named', function (t) {
-            var app, settings
+            var app, settings;
 
             app = express();
             settings = {

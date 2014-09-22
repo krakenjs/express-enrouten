@@ -98,9 +98,9 @@ app.use(enrouten({
 
 #### routerOptions
 The `routerOptions` configuration option (optional) allows additional options to be
-specified on each [Router](http://expressjs.com/4x/api.html#router) instance created by
-`express-enrouten`. Please see the Express API documentation for complete documentation
-on each possible option.
+specified on each Router instance created by `express-enrouten`. Please see the
+[Express API documentation](](http://expressjs.com/4x/api.html#router)) for complete
+documentation on each possible option.
 
 ```javascript
 app.set('case sensitive routing', true);

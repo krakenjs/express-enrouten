@@ -57,7 +57,7 @@ function mount(app, options) {
 
         if (typeof options.directory === 'string') {
             options.directory = resolve(options.basedir, options.directory);
-            directory(router, options.directory);
+            directory(router, options.directory, routerOptions);
         }
 
         if (typeof options.routes === 'object') {

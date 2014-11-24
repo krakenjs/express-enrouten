@@ -83,8 +83,8 @@ The `routes` configuration option (optional) is an array of route definition obj
 Each definition must have a `path` and `handler` property and can have an optional
 `method` property (`method` defaults to 'GET').
 
-Optionally, a `middlewares` property can be provided to specify middleware `functions`
-( with typical `req`, `res` and `next` arguments) for that specific route.
+Optionally, a `middleware` property can be provided to specify middleware `functions`
+(with typical `req`, `res` and `next` arguments) for that specific route.
 
 Note that a `handler` has a different function signature than a `controller`. While a
 `controller` takes a single argument (a `router`), a `handler` takes the typical
@@ -95,7 +95,7 @@ app.use(enrouten({
     routes: [
         { path: '/',    method: 'GET', handler: require('./routes/index') },
         { path: '/foo', method: 'GET', handler: require('./routes/foo') },
-        { path: '/admin', method: 'GET', handler: require('./routes/foo'), middlewares: [isAuthenticated] }
+        { path: '/admin', method: 'GET', handler: require('./routes/foo'), middleware: [isAuthenticated] }
     ]
 }));
 ```

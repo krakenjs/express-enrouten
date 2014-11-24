@@ -436,116 +436,116 @@ function run(test, name, mount, fn) {
             t.end();
         });
 
-	    t.test('single middleware', function(t) {
-		    var app, settings;
+        t.test('single middleware', function(t) {
+            var app, settings;
 
-		    app = express();
-		    settings = {
-			    routes: [
-				    {
-					    path: '/',
-					    method: 'get',
-					    middlewares: [
-						    function(req, res, next) {
-						        res.value = 'middleware';
-						        next();
-					        }
-					    ],
-					    handler: function (req, res) {
-						    res.send(res.value);
-					    }
-				    }
-			    ]
-		    };
+            app = express();
+            settings = {
+                routes: [
+                    {
+                        path: '/',
+                        method: 'get',
+                        middleware: [
+                            function(req, res, next) {
+                                res.value = 'middleware';
+                                next();
+                            }
+                        ],
+                        handler: function (req, res) {
+                            res.send(res.value);
+                        }
+                    }
+                ]
+            };
 
-		    fn(app, settings);
+            fn(app, settings);
 
-		    request(app)
-			    .get(mount)
-			    .expect('Content-Type', /html/)
-			    .expect(200, 'middleware', function (err) {
-				    t.error(err);
-				    t.end();
-			    });
-	    });
+            request(app)
+                .get(mount)
+                .expect('Content-Type', /html/)
+                .expect(200, 'middleware', function (err) {
+                    t.error(err);
+                    t.end();
+                });
+        });
 
-	    t.test('multiple middlewares', function(t) {
-		    var app, settings;
+        t.test('multiple middleware', function(t) {
+            var app, settings;
 
-		    app = express();
-		    settings = {
-			    routes: [
-				    {
-					    path: '/',
-					    method: 'get',
-					    middlewares: [
-						    function(req, res, next) {
-							    res.value1 = 1;
-							    next();
-						    },
-						    function(req, res, next) {
-							    res.value2 = 2;
-							    next();
-						    }
-					    ],
-					    handler: function (req, res) {
-						    res.send((res.value1 + res.value2).toString());
-					    }
-				    }
-			    ]
-		    };
+            app = express();
+            settings = {
+                routes: [
+                    {
+                        path: '/',
+                        method: 'get',
+                        middleware: [
+                            function(req, res, next) {
+                                res.value1 = 1;
+                                next();
+                            },
+                            function(req, res, next) {
+                                res.value2 = 2;
+                                next();
+                            }
+                        ],
+                        handler: function (req, res) {
+                            res.send((res.value1 + res.value2).toString());
+                        }
+                    }
+                ]
+            };
 
-		    fn(app, settings);
+            fn(app, settings);
 
-		    request(app)
-			    .get(mount)
-			    .expect('Content-Type', /html/)
-			    .expect(200, (3).toString(), function (err) {
-				    t.error(err);
-				    t.end();
-			    });
-	    });
+            request(app)
+                .get(mount)
+                .expect('Content-Type', /html/)
+                .expect(200, (3).toString(), function (err) {
+                    t.error(err);
+                    t.end();
+                });
+        });
 
-	    t.test('error thrown in middleware', function(t) {
-		    var app, settings;
+        t.test('error thrown in middleware', function(t) {
+            var app, settings;
 
-		    app = express();
-		    settings = {
-			    routes: [
-				    {
-					    path: '/',
-					    method: 'get',
-					    middlewares: [
-						    function(req, res, next) {
-							    next(new Error('middleware error'));
-						    },
-						    function(req, res, next) {
-							    res.msg = 'You wont see this';
-							    next();
-						    }
-					    ],
-					    handler: function (req, res) {
-						    res.send(res.msg);
-					    }
-				    }
-			    ]
-		    };
+            app = express();
+            settings = {
+                routes: [
+                    {
+                        path: '/',
+                        method: 'get',
+                        middleware: [
+                            function(req, res, next) {
+                                next(new Error('middleware error'));
+                            },
+                            function(req, res, next) {
+                                res.msg = 'You wont see this';
+                                next();
+                            }
+                        ],
+                        handler: function (req, res) {
+                            res.send(res.msg);
+                        }
+                    }
+                ]
+            };
 
-		    fn(app, settings);
+            fn(app, settings);
 
-		    // error handler
-		    app.use(function(err, req, res, next) {
-			    res.status(503).send(err.message);
-		    });
+            // error handler
+            app.use(function(err, req, res, next) {
+                res.status(503).send(err.message);
+            });
 
-		    request(app)
-			    .get(mount)
-			    .expect('Content-Type', /html/)
-			    .expect(503, 'middleware error', function (err) {
-				    t.error(err);
-				    t.end();
-			    });
-	    });
+            request(app)
+                .get(mount)
+                .expect('Content-Type', /html/)
+                .expect(503, 'middleware error', function (err) {
+                    t.error(err);
+                    t.end();
+                });
+        });
 
 
     });
@@ -601,7 +601,7 @@ function run(test, name, mount, fn) {
             t.end();
         });
 
-	    t.test()
+        t.test()
 
     });
 

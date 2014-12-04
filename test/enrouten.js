@@ -205,6 +205,46 @@ function run(test, name, mount, fn) {
             t.end();
         });
 
+
+        t.test('dot directories', function (t) {
+          var app, settings;
+
+          app = express();
+          settings = {
+            directory: path.join('fixtures', 'dotdirectory')
+          };
+
+          fn(app, settings);
+
+          get(app, mount + '/controller', function (err) {
+            t.error(err);
+            t.end();
+          });
+        });
+
+
+        t.test('custom extensions', function (t) {
+          var app, settings;
+
+          require.extensions['.partyscript'] = require.extensions['.js'];
+
+          app = express();
+          settings = {
+            directory: path.join('fixtures', 'customext')
+          };
+
+          fn(app, settings);
+
+          get(app, mount + '/controller', function (err) {
+            t.error(err);
+            get(app, mount + '/partycontroller', function (err) {
+              t.error(err);
+              delete require.extensions['.partyscript'];
+              t.end();
+            });
+          });
+        });
+
     });
 
 

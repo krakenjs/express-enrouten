@@ -28,6 +28,13 @@ function get(app, route, next) {
 }
 
 
+function getfail(app, route, status, next) {
+    request(app)
+        .get(route)
+        .expect(status, next);
+}
+
+
 function run(test, name, mount, fn) {
 
     test(name + ' mounting', function (t) {
@@ -98,6 +105,73 @@ function run(test, name, mount, fn) {
                 get(app, mount + '/subdirectory/subcontroller', function (err) {
                     t.error(err);
                     t.end();
+                });
+            });
+        });
+
+
+        t.test('router caseSensitive', function (t) {
+            var app, settings;
+
+            app = express();
+            app.set('case sensitive routing', true);
+            settings = {
+                directory: path.join('fixtures', 'caseSensitive'),
+                routerOptions: {
+                    caseSensitive: true
+                }
+            };
+
+            fn(app, settings);
+
+            get(app, mount + '/caseSensitive', function (err) {
+                t.error(err);
+                getfail(app, mount + '/casesensitive', 404, function (err) {
+                    t.error(err);
+                    get(app, mount + '/lowercase', function (err) {
+                        t.error(err);
+                        getfail(app, mount + '/LOWERCASE', 404, function (err) {
+                            t.error(err);
+                            get(app, mount + '/UPPERCASE', function (err) {
+                                t.error(err);
+                                getfail(app, mount + '/uppercase', 404, function (err) {
+                                    t.error(err);
+                                    t.end();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+
+        t.test('router strict', function (t) {
+            var app, settings;
+
+            app = express();
+            app.set('strict routing', true);
+            settings = {
+                index: path.join('fixtures', 'strict'),
+                routerOptions: {
+                    strict: true
+                }
+            };
+
+            fn(app, settings);
+
+            get(app, mount + '/', function (err) {
+                t.error(err);
+                get(app, mount + '/strict', function (err) {
+                    getfail(app, mount + '/strict/', 404, function (err) {
+                        t.error(err);
+                        get(app, mount + '/very-strict/', function (err) {
+                            getfail(app, mount + '/very-strict', 404, function (err) {
+                                t.error(err);
+                                t.end();
+                            });
+                        });
+                    });
                 });
             });
         });

@@ -92,6 +92,23 @@ app.use(enrouten({
 }));
 ```
 
+#### routerOptions
+The `routerOptions` configuration option (optional) allows additional options to be
+specified on each Router instance created by `express-enrouten`. Please see the
+[Express API documentation](http://expressjs.com/4x/api.html#router) for complete
+documentation on each possible option.
+
+```javascript
+app.set('case sensitive routing', true);
+app.use(enrouten({
+    directory: 'controllers',
+    routerOptions: {
+        caseSensitive: true
+    }
+}));
+```
+
+
 ### Named Routes
 For `index` and `directory` configurations there is also support for named routes.
 The normal express router that is passed in will always behave as such, but in addition

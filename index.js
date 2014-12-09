@@ -37,13 +37,17 @@ var directory = require('./lib/directory');
 function mount(app, options) {
 
     return function onmount(parent) {
-        var router;
+        var router,
+            routerOptions;
+
+        // allow inherited options to be passed to created Routers
+        routerOptions = options.routerOptions || {};
 
         // Remove sacrificial express app and keep a
         // copy of the currently registered items.
         /// XXX: caveat emptor, private member
         parent._router.stack.pop();
-        router = registry(app.mountpath);
+        router = registry(app.mountpath, null, routerOptions);
 
         // Process the configuration, adding to the stack
         if (typeof options.index === 'string') {
@@ -53,7 +57,7 @@ function mount(app, options) {
 
         if (typeof options.directory === 'string') {
             options.directory = resolve(options.basedir, options.directory);
-            directory(router, options.directory);
+            directory(router, options.directory, routerOptions);
         }
 
         if (typeof options.routes === 'object') {

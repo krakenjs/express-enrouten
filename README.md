@@ -83,7 +83,7 @@ The `routes` configuration option (optional) is an array of route definition obj
 Each definition must have a `path` and `handler` property and can have an optional
 `method` property (`method` defaults to 'GET').
 
-Optionally, a `middleware` property can be provided to specify middleware `functions`
+Optionally, a `middleware` property can be provided to specify an array of middleware `functions`
 (with typical `req`, `res` and `next` arguments) for that specific route.
 
 Note that a `handler` has a different function signature than a `controller`. While a

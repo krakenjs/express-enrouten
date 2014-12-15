@@ -12,9 +12,6 @@ Note: `express-enrouten >=1.0` is only compatible with `express >=4.0`.
 For `express 3.x` support, please use `express-enrouten 0.3.x`.
 
 
-[![Build Status](https://travis-ci.org/krakenjs/express-enrouten.png)](https://travis-ci.org/krakenjs/express-enrouten)
-[![NPM version](https://badge.fury.io/js/express-enrouten.png)](http://badge.fury.io/js/express-enrouten)
-
 ### API
 #### `app.use(enrouten(options))`
 ```javascript

@@ -36,6 +36,6 @@
   "dependencies": {
     "caller": "^1.0.0",
     "debuglog": "^1.0.1",
-    "reverend": "^0.3.0"
+    "path-to-regexp": "^1.1.1"
   }
 }

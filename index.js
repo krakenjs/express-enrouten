@@ -20,12 +20,12 @@
 var path = require('path');
 var caller = require('caller');
 var express = require('express');
-var reverend = require('reverend');
 var debug = require('debuglog')('enrouten');
 var index = require('./lib/index');
 var routes = require('./lib/routes');
 var registry = require('./lib/registry');
 var directory = require('./lib/directory');
+var path2regexp = require('path-to-regexp');
 
 
 /**
@@ -73,7 +73,7 @@ function mount(app, options) {
                 var route;
                 route = this.routes[name];
                 if (typeof route === 'string') {
-                    return reverend(route, data || {});
+                    return path2regexp.compile(route)(data);
                 }
                 return undefined;
             }

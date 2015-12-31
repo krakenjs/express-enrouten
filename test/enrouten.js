@@ -43,11 +43,11 @@ function run(test, name, mount, fn) {
         app = express();
         fn(app);
 
-        fn(app, { basedir: path.join(__dirname, 'fixtures') });
-        fn(app, { directory: null });
-        fn(app, { index: null });
-        fn(app, { routes: null });
-        fn(app, { routes: [] });
+        fn(app, {basedir: path.join(__dirname, 'fixtures')});
+        fn(app, {directory: null});
+        fn(app, {index: null});
+        fn(app, {routes: null});
+        fn(app, {routes: []});
 
         // Enrouten always adds one router, regardless
         // of config.
@@ -233,6 +233,30 @@ function run(test, name, mount, fn) {
                     t.end();
                 });
             });
+        });
+
+
+        t.test('ignore configuration', function (t) {
+
+            var app, settings;
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'ignore')
+            };
+
+            t.plan(1);
+            t.doesNotThrow(function () {
+                fn(app, settings);
+                t.plan(3);
+                get(app, mount + '/controller', function (err) {
+                    t.error(err);
+                    get(app, mount + '/subignore/subcontroller', function (err) {
+                        t.error(err);
+                        // Expected to fail, as we want to ignore this file.
+                    });
+                });
+            }, 'Invalid files are ignored and do not cause failures');
         });
 
 
@@ -510,7 +534,7 @@ function run(test, name, mount, fn) {
             t.end();
         });
 
-        t.test('single middleware', function(t) {
+        t.test('single middleware', function (t) {
             var app, settings;
 
             app = express();
@@ -520,7 +544,7 @@ function run(test, name, mount, fn) {
                         path: '/',
                         method: 'get',
                         middleware: [
-                            function(req, res, next) {
+                            function (req, res, next) {
                                 res.value = 'middleware';
                                 next();
                             }
@@ -543,7 +567,7 @@ function run(test, name, mount, fn) {
                 });
         });
 
-        t.test('multiple middleware', function(t) {
+        t.test('multiple middleware', function (t) {
             var app, settings;
 
             app = express();
@@ -553,11 +577,11 @@ function run(test, name, mount, fn) {
                         path: '/',
                         method: 'get',
                         middleware: [
-                            function(req, res, next) {
+                            function (req, res, next) {
                                 res.value1 = 1;
                                 next();
                             },
-                            function(req, res, next) {
+                            function (req, res, next) {
                                 res.value2 = 2;
                                 next();
                             }
@@ -580,7 +604,7 @@ function run(test, name, mount, fn) {
                 });
         });
 
-        t.test('error thrown in middleware', function(t) {
+        t.test('error thrown in middleware', function (t) {
             var app, settings;
 
             app = express();
@@ -590,10 +614,10 @@ function run(test, name, mount, fn) {
                         path: '/',
                         method: 'get',
                         middleware: [
-                            function(req, res, next) {
+                            function (req, res, next) {
                                 next(new Error('middleware error'));
                             },
-                            function(req, res, next) {
+                            function (req, res, next) {
                                 res.msg = 'You wont see this';
                                 next();
                             }
@@ -608,7 +632,7 @@ function run(test, name, mount, fn) {
             fn(app, settings);
 
             // error handler
-            app.use(function(err, req, res, next) {
+            app.use(function (err, req, res, next) {
                 res.status(503).send(err.message);
             });
 
@@ -635,12 +659,12 @@ function run(test, name, mount, fn) {
             };
 
             // enrouten not yet run
-            actual = enrouten.path(app, 'the-bar', { id: 10 });
+            actual = enrouten.path(app, 'the-bar', {id: 10});
             t.equal(actual, undefined);
 
             fn(app, settings);
 
-            actual = enrouten.path(app, 'the-bar', { id: 10 });
+            actual = enrouten.path(app, 'the-bar', {id: 10});
             t.equal(actual, mount + '/bar/10');
 
             actual = enrouten.path(app, 'my-bar');
@@ -663,7 +687,7 @@ function run(test, name, mount, fn) {
 
             fn(app, settings);
 
-            actual = app.locals.enrouten.path('the-bar', { id: 10 });
+            actual = app.locals.enrouten.path('the-bar', {id: 10});
             t.equal(actual, mount + '/bar/10');
 
             actual = app.locals.enrouten.path('my-bar');

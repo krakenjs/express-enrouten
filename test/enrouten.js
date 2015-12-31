@@ -176,6 +176,20 @@ function run(test, name, mount, fn) {
             });
         });
 
+        t.test('no extension', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'noExtension')
+            };
+
+            fn(app, settings);
+            get(app, mount + '/controller', function (err) {
+                t.error(err);
+                t.end();
+            });
+        });
 
         t.test('index', function (t) {
             var app, settings;

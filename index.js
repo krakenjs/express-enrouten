@@ -20,12 +20,12 @@
 var path = require('path');
 var caller = require('caller');
 var express = require('express');
-var debug = require('debuglog')('enrouten');
 var index = require('./lib/index');
 var routes = require('./lib/routes');
 var registry = require('./lib/registry');
 var directory = require('./lib/directory');
 var path2regexp = require('path-to-regexp');
+var debug = require('debuglog')('enrouten');
 
 
 /**
@@ -55,8 +55,24 @@ function mount(app, options) {
             index(router, options.index);
         }
 
-        if (typeof options.directory === 'string') {
-            options.directory = resolve(options.basedir, options.directory);
+        if ((options.directory && typeof options.directory === 'object' && typeof options.directory.path === 'string')
+            // Deprecated: Keep this one for backwards compatibility.
+            || typeof options.directory === 'string') {
+
+            // Cast legacy config into new config.
+            if (typeof options.directory === 'string') {
+                console.error('express-enrouten:\n' +
+                    'Deprecated configuration. Directory config must be an object:\n ' +
+                    '{"path":"path/to/controllers" [, ignore:["pattern1, ... patternN"]}');
+                options.directory = {
+                    path: options.directory,
+                    ignore: []
+                }
+            }
+
+            options.directory.path = resolve(options.basedir, options.directory.path);
+            options.directory.ignore = options.directory.ignore || [];
+
             directory(router, options.directory, routerOptions);
         }
 

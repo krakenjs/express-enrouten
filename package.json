@@ -31,11 +31,12 @@
     "istanbul": "^0.3.2",
     "jshint": "^2.5.10",
     "supertest": "^0.15.0",
-    "tape": "^3.0.3"
+    "tape": "^4.4.0"
   },
   "dependencies": {
     "caller": "^1.0.0",
     "debuglog": "^1.0.1",
+    "minimatch": "^3.0.0",
     "path-to-regexp": "^1.1.1"
   }
 }

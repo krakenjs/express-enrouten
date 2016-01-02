@@ -242,7 +242,14 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'ignore')
+                directory: {
+                    path: path.join('fixtures', 'ignore'),
+                    ignore: [
+                        'noExtensionFile', // It will ignore any file named "noExtensionFile"
+                        '**/_CVS/*',  // It will ignore the contents of any "_CSV" directory
+                        '/subignore/notAController.js' // It will ignore this specific file, relative to the path above.
+                    ]
+                }
             };
 
             t.plan(1);
@@ -253,7 +260,6 @@ function run(test, name, mount, fn) {
                     t.error(err);
                     get(app, mount + '/subignore/subcontroller', function (err) {
                         t.error(err);
-                        // Expected to fail, as we want to ignore this file.
                     });
                 });
             }, 'Invalid files are ignored and do not cause failures');

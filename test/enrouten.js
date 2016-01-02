@@ -63,7 +63,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'flat')
+                directory: {
+                    path: path.join('fixtures', 'flat')
+                }
             };
 
             fn(app, settings);
@@ -79,7 +81,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join(__dirname, 'fixtures', 'flat')
+                directory: {
+                    path: path.join(__dirname, 'fixtures', 'flat')
+                }
             };
 
             fn(app, settings);
@@ -95,7 +99,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'nested')
+                directory: {
+                    path: path.join('fixtures', 'nested')
+                }
             };
 
             fn(app, settings);
@@ -116,7 +122,9 @@ function run(test, name, mount, fn) {
             app = express();
             app.set('case sensitive routing', true);
             settings = {
-                directory: path.join('fixtures', 'caseSensitive'),
+                directory: {
+                    path: path.join('fixtures', 'caseSensitive')
+                },
                 routerOptions: {
                     caseSensitive: true
                 }
@@ -182,7 +190,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'indexed')
+                directory: {
+                    path: path.join('fixtures', 'indexed')
+                }
             };
 
             fn(app, settings);
@@ -205,7 +215,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'undefined')
+                directory: {
+                    path: path.join('fixtures', 'undefined')
+                }
             };
 
             t.throws(function () {
@@ -221,7 +233,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'superfluous')
+                directory: {
+                    path: path.join('fixtures', 'superfluous')
+                }
             };
 
             fn(app, settings);
@@ -271,7 +285,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'named', 'routes')
+                directory: {
+                    path: path.join('fixtures', 'named', 'routes')
+                }
             };
 
             fn(app, settings);
@@ -299,7 +315,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'named', 'duplicates')
+                directory: {
+                    path: path.join('fixtures', 'named', 'duplicates')
+                }
             };
 
             t.throws(function () {
@@ -661,7 +679,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'named', 'routes')
+                directory: {
+                    path: path.join('fixtures', 'named', 'routes')
+                }
             };
 
             // enrouten not yet run
@@ -688,7 +708,9 @@ function run(test, name, mount, fn) {
 
             app = express();
             settings = {
-                directory: path.join('fixtures', 'named', 'routes')
+                directory: {
+                    path: path.join('fixtures', 'named', 'routes')
+                }
             };
 
             fn(app, settings);

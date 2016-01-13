@@ -90,6 +90,42 @@ function run(test, name, mount, fn) {
         });
 
 
+        t.test('unknown extensions (regression)', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                directory: path.join(__dirname, 'fixtures', 'extensions', 'unknown')
+            };
+
+            fn(app, settings);
+            get(app, mount + '/controller', function (err) {
+                t.error(err);
+                t.end();
+            });
+        });
+
+
+        t.test('custom extensions', function (t) {
+            var app, settings;
+
+            require.extensions['.custom'] = require.extensions['.js'];
+            
+            app = express();
+            settings = {
+                directory: path.join(__dirname, 'fixtures', 'extensions', 'custom')
+            };
+
+            fn(app, settings);
+            
+            get(app, mount + '/controller', function (err) {
+                t.error(err);
+                delete require.extensions['.custom'];
+                t.end();
+            });              
+        });
+
+
         t.test('nested', function (t) {
             var app, settings;
 

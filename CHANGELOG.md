@@ -1,3 +1,7 @@
+##### v1.2.2 - 20160115
+**Bugs**
+- Fix logic regarding requiring files with duplicate naming
+
 ##### v0.2.1 - 20140210
 **Bugs**
 - Fix order of scanning and router placement to ensure middleware comes before router.

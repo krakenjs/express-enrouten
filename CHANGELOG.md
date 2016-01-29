@@ -1,3 +1,7 @@
+##### v1.2.3 - 20160129
+**Bugs**
+- Fix regression for bad controllers in directory (#79, #81)
+
 ##### v1.2.2 - 20160115
 **Bugs**
 - Fix logic regarding requiring files with duplicate naming

@@ -1,3 +1,7 @@
+##### v1.3.0 - 20160129
+**Features**
+- Add support for babel 6 transformed controllers wth default export
+
 ##### v1.2.3 - 20160129
 **Bugs**
 - Fix regression for bad controllers in directory (#79, #81)

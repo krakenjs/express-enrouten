@@ -142,6 +142,23 @@ function run(test, name, mount, fn) {
 
             t.end();
         });
+
+
+        t.test('es6 default export', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                directory: path.join('fixtures', 'transpiled')
+            };
+
+            fn(app, settings);
+
+            get(app, mount + '/controller', function (err) {
+                t.error(err);
+                t.end();
+            });
+        });
         
         
         t.test('nested', function (t) {
@@ -375,6 +392,23 @@ function run(test, name, mount, fn) {
                     t.error(err);
                     t.end();
                 });
+            });
+        });
+
+
+        t.test('transpiled from es6', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                index: path.join('fixtures', 'transpiled', 'controller')
+            };
+
+            fn(app, settings);
+
+            get(app, mount, function (err) {
+                t.error(err);
+                t.end();
             });
         });
 

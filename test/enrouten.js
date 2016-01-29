@@ -126,6 +126,24 @@ function run(test, name, mount, fn) {
         });
 
 
+        t.test('throw from required module', function (t) {
+            var app, settings;
+
+            t.plan(1);
+
+            app = express();
+            settings = {
+                directory: path.join(__dirname, 'fixtures', 'badController')
+            };
+
+            t.throws(function () {
+                fn(app, settings);
+            });
+
+            t.end();
+        });
+        
+        
         t.test('nested', function (t) {
             var app, settings;
 

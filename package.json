@@ -27,6 +27,7 @@
     }
   ],
   "devDependencies": {
+    "coffee-script": "^1.9.3",
     "express": "^4.10.3",
     "istanbul": "^0.3.2",
     "jshint": "^2.5.10",

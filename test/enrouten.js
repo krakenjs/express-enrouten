@@ -1,5 +1,6 @@
 'use strict';
 
+require('coffee-script/register');
 var test = require('tape');
 var path = require('path');
 var express = require('express');
@@ -110,19 +111,37 @@ function run(test, name, mount, fn) {
             var app, settings;
 
             require.extensions['.custom'] = require.extensions['.js'];
-            
+
             app = express();
             settings = {
                 directory: path.join(__dirname, 'fixtures', 'extensions', 'custom')
             };
 
             fn(app, settings);
-            
+
             get(app, mount + '/controller', function (err) {
                 t.error(err);
                 delete require.extensions['.custom'];
                 t.end();
-            });              
+            });
+        });
+
+        t.test('compile to js extensions', function (t) {
+            var app, settings;
+
+            app = express();
+            settings = {
+                index: path.join(__dirname, 'fixtures', 'compiled', "routes")
+            };
+
+            fn(app, settings);
+            get(app, mount, function (err) {
+                t.error(err);
+                get(app, mount + '/coffee', function (err) {
+                    t.error(err);
+                    t.end();
+                });
+            });
         });
 
 
@@ -159,8 +178,8 @@ function run(test, name, mount, fn) {
                 t.end();
             });
         });
-        
-        
+
+
         t.test('nested', function (t) {
             var app, settings;
 

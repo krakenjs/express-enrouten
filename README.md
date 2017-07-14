@@ -1,7 +1,4 @@
-express-enrouten
-==================
-
-Lead Maintainer: [Jean-Charles Sisk](https://github.com/jasisk)
+# express-enrouten
 
 [![Build Status](https://travis-ci.org/krakenjs/express-enrouten.svg?branch=master)](https://travis-ci.org/krakenjs/express-enrouten)   
 [![NPM version](https://badge.fury.io/js/express-enrouten.png)](http://badge.fury.io/js/express-enrouten)  

@@ -115,6 +115,20 @@ app.use(enrouten({
 }));
 ```
 
+#### extentions
+The `extensions` configuration option (optional) is a workaround for failures in test frameworks like Jest because
+they disallow the use of require.extensions (which is deprecated).
+
+  ```javascript
+app.use(enrouten({
+    directory: 'controllers',
+    extensions: {
+      '.js': 1,
+      '.json': 1,
+      '.node': 1
+    }
+}));
+```
 
 ### Named Routes
 For `index` and `directory` configurations there is also support for named routes.
